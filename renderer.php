@@ -82,7 +82,6 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         foreach($options as $option) {
             $format_options[$option->name] =$option->value;
         }
-//        $format_options = $this->get_format_options();
 
         $context = context_course::instance($course->id);
         // Title with completion help icon.
@@ -96,9 +95,22 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         // Now the list of sections..
 //        echo $this->start_section_list();
         $numsections = course_get_format($course)->get_last_section_number();
-
-
-
+        $sections = $modinfo->get_section_info_all();
+        // display section-0 on top of tabs
+        if($format_options['section0_ontop']) {
+            $section0 = $sections[0];
+            echo $this->start_section_list();
+            echo html_writer::start_tag('div', array('class' => 'section0_ontop'));
+            // 0-section is displayed a little different then the others
+            if ($section0->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
+                echo $this->section_header($section0, $course, false, 0);
+                echo $this->courserenderer->course_section_cm_list($course, $section0, 0);
+                echo $this->courserenderer->course_section_add_cm_control($course, 0, 0);
+                echo $this->section_footer();
+            }
+            echo html_writer::end_tag('div');
+            echo $this->end_section_list();
+        }
 
 
 
@@ -108,9 +120,9 @@ class format_tabtopics_renderer extends format_section_renderer_base {
 
         // rendering the tab navigation
         echo html_writer::start_tag('ul', array('class'=>'qmultabs nav nav-tabs row'));
-        echo html_writer::start_tag('li', array('class' => 'qmultabitem nav-item'));
-
+/*
         // if there are no tabs show the standard "Module Content" tab and hide it otherwise
+        echo html_writer::start_tag('li', array('class' => 'qmultabitem nav-item'));
         if($count_tabs == 0) {
             echo html_writer::tag('a', get_string('modulecontent', 'format_tabtopics'),
                 array('data-toggle' => 'tab', 'class' => 'qmultablink nav-link active modulecontentlink', 'href' => '#modulecontent')
@@ -121,6 +133,7 @@ class format_tabtopics_renderer extends format_section_renderer_base {
             );
         }
         echo html_writer::end_tag('li');
+*/
 
         // the new tab navigation
         $tab_seq = array();
@@ -150,8 +163,11 @@ class format_tabtopics_renderer extends format_section_renderer_base {
 
         echo $this->start_section_list();
 
-        foreach ($modinfo->get_section_info_all() as $section => $thissection) {
+        foreach ($sections as $section => $thissection) {
             if ($section == 0) {
+                if($format_options['section0_ontop']){ // section-0 is already shown on top
+                    continue;
+                }
                 // 0-section is displayed a little different then the others
                 if ($thissection->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
                     echo $this->section_header($thissection, $course, false, 0);
@@ -528,13 +544,13 @@ function check_section_ids($courseid, $sections, $section_ids, $section_nums, $t
     else { // all IDs are good - so check stored section numbers and restore them with the real numbers in case they have changed
         $new_sectionnums = implode(',', $new_section_nums);
         if($tab_section_nums !== $new_sectionnums) { // the stored section numbers seems to be different
-            if($DB->record_exists('course_format_options', array('courseid' => $course->id, 'name' => 'tab'.$i.'_sectionnums'))) {
-                $tab_format_record = $DB->get_record('course_format_options', array('courseid' => $course->id, 'name' => 'tab'.$i.'_sectionnums'));
+            if($DB->record_exists('course_format_options', array('courseid' => $courseid, 'name' => 'tab'.$i.'_sectionnums'))) {
+                $tab_format_record = $DB->get_record('course_format_options', array('courseid' => $courseid, 'name' => 'tab'.$i.'_sectionnums'));
                 $DB->update_record('course_format_options', array('id' => $tab_format_record->id, 'value' => $new_sectionnums));
             } else {
                 $new_tab_format_record = new \stdClass();
-                $new_tab_format_record->courseid = $course->id;
-                $new_tab_format_record->format = 'qmultabtc';
+                $new_tab_format_record->courseid = $courseid;
+                $new_tab_format_record->format = 'tabtopics';
                 $new_tab_format_record->sectionid = 0;
                 $new_tab_format_record->name = 'tab'.$i.'_sectionnums';
                 $new_tab_format_record->value = $new_sectionnums;

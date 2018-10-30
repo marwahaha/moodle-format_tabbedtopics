@@ -62,17 +62,6 @@ define(['jquery', 'jqueryui'], function($) {
             };
 
 // ---------------------------------------------------------------------------------------------------------------------
-            // the "Assessment Info" tab is clicked
-            $("#tab_assessment00").click(function(){
-                console.log('Assessment Info tab clicked!');
-                $("li.section").hide();
-                $("li.section.hidden").addClass("hiding");
-                $("li.section.hiding").removeClass("hidden");
-
-                $('.assessment_info_content').show();
-            });
-
-// ---------------------------------------------------------------------------------------------------------------------
             // react to a clicked tab
             var tabclick = function() {$(".tablink").on('click', function() {
                 var tabid = $(this).attr('id');
@@ -121,18 +110,22 @@ define(['jquery', 'jqueryui'], function($) {
                     });
                 }
 
-                var visible_sections=$('li.section:visible').length;
-                var visible_stealth_sections=$('li.section.stealth:visible').length;
-                var visible_hidden_sections=$('li.section.hidden:visible').length;
-                var visible_blocks = $('#modulecontent').find('.block:visible');
-                var no_student_sections = visible_hidden_sections;
-                console.log('number of visible sections: '+visible_sections);
-                console.log('number of stealth sections: '+visible_stealth_sections);
-                console.log('number of hidden sections: '+visible_hidden_sections);
-                console.log('number of visible blocks: '+visible_blocks.length);
-                console.log('no student sections: '+no_student_sections);
+                if ($('.section0_ontop'.length > 0)) {
+                    $('#section-0').removeClass('sectionxxx');
+                }
 
-                if(visible_sections <= no_student_sections && visible_blocks.length === 0) {
+                // show section-0 when it should be shown always
+                $('.section0_ontop #section-0').show();
+
+                var visible_sections=$('li.section:visible').length;
+                var hidden_sections=$('li.section.hidden:visible').length;
+                if ($('.section0_ontop'.length > 0)) {
+                    visible_sections--;
+                }
+                console.log('number of visible sections: '+visible_sections);
+                console.log('number of hidden sections: '+hidden_sections);
+
+                if(visible_sections <= hidden_sections) {
                     $(this).addClass('tab-not-shown');
                     if($('#not-shown-hint-'+tabid).length === 0) {
                         var hint_text = "This tab contains only hidden sections and will not be shown to students";
@@ -143,7 +136,7 @@ define(['jquery', 'jqueryui'], function($) {
                     $('#not-shown-hint-'+tabid).remove();
                 }
 
-                if(visible_sections < 1 && visible_blocks.length === 0) {
+                if(visible_sections < 1) {
                     console.log('tab with no visible sections or blocks - hiding it');
                     $(this).parent().hide();
                 } else {
@@ -164,9 +157,6 @@ define(['jquery', 'jqueryui'], function($) {
                         restore_section(target);
                     }
                 }
-
-                // show section-0 when it should be shown always
-                $('.section0_always #section-0').show();
             });};
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -311,7 +301,7 @@ define(['jquery', 'jqueryui'], function($) {
                 tabmove();
 
                 //show the edit menu for section-0 - but not when it's shown above the tabs
-                if($('.section0_always').length === 0) {
+                if($('.section0_ontop').length === 0) {
                     $("#section-0 .right.side").show();
                 }
 

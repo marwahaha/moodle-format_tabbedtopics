@@ -52,5 +52,6 @@ $string['assessment_info_tab'] = 'Show "Assessment Info" block under a tab';
 $string['assessment_info_tab_label'] = 'Show "Assessment Info" block under a tab if installed';
 $string['assessment_info_tab_help'] = 'When checked the "Assessment Info" block is shown under a tab if it is installed.';
 
+$string['tabname'] = 'Tab';
 $string['tabtitle_edithint'] = 'Edit tab name';
 $string['tabtitle_editlabel'] = 'New value for {a}';

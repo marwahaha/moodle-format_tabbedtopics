@@ -531,7 +531,7 @@ function format_tabtopics_inplace_editable($itemtype, $itemid, $newvalue) {
         $DB->update_record('course_format_options', array('id' => $record->id, 'value' => $newvalue));
 
         // Prepare the element for the output ():
-        $output = new \core\output\inplace_editable('format_qmultabtc', 'tabname', $record->id,
+        $output = new \core\output\inplace_editable('format_tabtopics', 'tabname', $record->id,
             true,
             format_string($newvalue), $newvalue, 'Edit tab name',  'New value for ' . format_string($newvalue));
 
