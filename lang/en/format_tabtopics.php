@@ -37,3 +37,20 @@ $string['page-course-view-tabtopics-x'] = 'Any course page in tabtopics format';
 $string['hidefromothers'] = 'Hide topic';
 $string['showfromothers'] = 'Show topic';
 $string['privacy:metadata'] = 'The Topics format plugin does not store any personal data.';
+
+// tab related strings
+$string['modulecontent'] = 'Module Content';
+
+$string['section0_label'] = 'Show Topic 0 above all tabs';
+$string['section0_help'] = 'When checked topic 0 is always shown above the tabs.';
+
+$string['single_section_tabs'] = 'Use section name as tab name for single sections';
+$string['single_section_tabs_label'] = 'Use section name as tab name for single sections';
+$string['single_section_tabs_help'] = 'When checked tabs with a single section will use the section name as tab name.';
+
+$string['assessment_info_tab'] = 'Show "Assessment Info" block under a tab';
+$string['assessment_info_tab_label'] = 'Show "Assessment Info" block under a tab if installed';
+$string['assessment_info_tab_help'] = 'When checked the "Assessment Info" block is shown under a tab if it is installed.';
+
+$string['tabtitle_edithint'] = 'Edit tab name';
+$string['tabtitle_editlabel'] = 'New value for {a}';

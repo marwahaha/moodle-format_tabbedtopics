@@ -223,6 +223,8 @@ class format_tabtopics extends format_base {
      * @return array of options
      */
     public function course_format_options($foreditform = false) {
+        global $CFG;
+        $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
         static $courseformatoptions = false;
         if ($courseformatoptions === false) {
             $courseconfig = get_config('moodlecourse');
@@ -235,7 +237,29 @@ class format_tabtopics extends format_base {
                     'default' => $courseconfig->coursedisplay,
                     'type' => PARAM_INT,
                 ),
+                'section0_ontop' => array(
+                    'default' => false,
+                    'type' => PARAM_BOOL
+                ),
+
+                'single_section_tabs' => array(
+                    'default' => get_config('format_tabtopics', 'defaultsectionnameastabname'),
+                    'type' => PARAM_BOOL
+                ),
             );
+
+            // the sequence in which the tabs will be displayed
+            $courseformatoptions['tab_seq'] = array('default' => '','type' => PARAM_TEXT,'label' => '','element_type' => 'hidden',);
+
+            // now loop through the tabs but don't show them as we only need the DB records...
+            $courseformatoptions['tab0_title'] = array('default' => get_string('tabzero_title', 'format_tabtopics'),'type' => PARAM_TEXT,'label' => '','element_type' => 'hidden',);
+            $courseformatoptions['tab0'] = array('default' => "",'type' => PARAM_TEXT,'label' => '','element_type' => 'hidden',);
+            for ($i = 1; $i <= $max_tabs; $i++) {
+                $courseformatoptions['tab'.$i.'_title'] = array('default' => "Tab ".$i,'type' => PARAM_TEXT,'label' => '','element_type' => 'hidden',);
+                $courseformatoptions['tab'.$i] = array('default' => "",'type' => PARAM_TEXT,'label' => '','element_type' => 'hidden',);
+                $courseformatoptions['tab'.$i.'_sectionnums'] = array('default' => "",'type' => PARAM_TEXT,'label' => '','element_type' => 'hidden',);
+            }
+
         }
         if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
             $courseformatoptionsedit = array(
@@ -262,7 +286,19 @@ class format_tabtopics extends format_base {
                     ),
                     'help' => 'coursedisplay',
                     'help_component' => 'moodle',
-                )
+                ),
+                'section0_ontop' => array(
+                    'label' => get_string('section0_label', 'format_tabtopics'),
+                    'element_type' => 'advcheckbox',
+                    'help' => 'section0',
+                    'help_component' => 'format_tabtopics',
+                ),
+                'single_section_tabs' => array(
+                    'label' => get_string('single_section_tabs_label', 'format_tabtopics'),
+                    'element_type' => 'advcheckbox',
+                    'help' => 'single_section_tabs',
+                    'help_component' => 'format_tabtopics',
+                ),
             );
             $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
         }
@@ -386,11 +422,51 @@ class format_tabtopics extends format_base {
     public function section_action($section, $action, $sr) {
         global $PAGE;
 
+        $tcsettings = $this->get_format_options();
         if ($section->section && ($action === 'setmarker' || $action === 'removemarker')) {
             // Format 'tabtopics' allows to set and remove markers in addition to common section actions.
             require_capability('moodle/course:setcurrentsection', context_course::instance($this->courseid));
             course_set_marker($this->courseid, ($action === 'setmarker') ? $section->section : 0);
             return null;
+        }
+
+        switch ($action) {
+            case 'movetotabzero':
+                return move2tab(0, $section->id, $section->section, $tcsettings);
+                break;
+            case 'movetotabone':
+                return move2tab(1, $section->id, $section->section, $tcsettings);
+                break;
+            case 'movetotabtwo':
+                return move2tab(2, $section->id, $section->section, $tcsettings);
+                break;
+            case 'movetotabthree':
+                return move2tab(3, $section->id, $section->section, $tcsettings);
+                break;
+            case 'movetotabfour':
+                return move2tab(4, $section->id, $section->section, $tcsettings);
+                break;
+            case 'movetotabfive':
+                return move2tab(5, $section->id, $section->section, $tcsettings);
+                break;
+            case 'movetotabsix':
+                return move2tab(6, $section->id, $section->section, $tcsettings);
+                break;
+            case 'movetotabseven':
+                return move2tab(7, $section->id, $section->section, $tcsettings);
+                break;
+            case 'movetotabeight':
+                return move2tab(8, $section->id, $section->section, $tcsettings);
+                break;
+            case 'movetotabnine':
+                return move2tab(9, $section->id, $section->section, $tcsettings);
+                break;
+            case 'movetotabten':
+                return move2tab(10, $section->id, $section->section, $tcsettings);
+                break;
+            case 'removefromtabs':
+                return removefromtabs($PAGE->course, $section->id, $section->section, $tcsettings);
+                break;
         }
 
         // For show/hide actions call the parent method and return the new content for .section_availability element.
@@ -411,6 +487,14 @@ class format_tabtopics extends format_base {
         return $this->get_format_options();
     }
 }
+/**
+ * Implements callback inplace_editable() allowing to edit values in-place.
+ *
+ * @param string $itemtype
+ * @param int $itemidÏ
+ * @param mixed $newvalue
+ * @return \core\output\inplace_editable
+ */
 
 /**
  * Implements callback inplace_editable() allowing to edit values in-place
@@ -429,4 +513,89 @@ function format_tabtopics_inplace_editable($itemtype, $itemid, $newvalue) {
             array($itemid, 'tabtopics'), MUST_EXIST);
         return course_get_format($section->course)->inplace_editable_update_section_name($section, $itemtype, $newvalue);
     }
+    // deal with inplace changes of a tab name
+    if ($itemtype === 'tabname') {
+        global $DB, $PAGE;
+        $courseid = key($_SESSION['USER']->currentcourseaccess);
+        // the $itemid is actually the name of the record so use it to get the id
+
+        // update the database with the new value given
+        // Must call validate_context for either system, or course or course module context.
+        // This will both check access and set current context.
+        \external_api::validate_context(context_system::instance());
+        // Check permission of the user to update this item.
+//        require_capability('moodle/course:update', context_system::instance());
+        // Clean input and update the record.
+        $newvalue = clean_param($newvalue, PARAM_NOTAGS);
+        $record = $DB->get_record('course_format_options', array('id' => $itemid), '*', MUST_EXIST);
+        $DB->update_record('course_format_options', array('id' => $record->id, 'value' => $newvalue));
+
+        // Prepare the element for the output ():
+        $output = new \core\output\inplace_editable('format_qmultabtc', 'tabname', $record->id,
+            true,
+            format_string($newvalue), $newvalue, 'Edit tab name',  'New value for ' . format_string($newvalue));
+
+        return $output;
+    }
 }
+
+
+// move section ID and section number to tab format settings of a given tab
+function move2tab($tabnum, $sectionid, $sectionnum, $settings) {
+    global $PAGE;
+    global $DB;
+
+    $course = $PAGE->course;
+
+    // remove section number from all tab format settings
+    $settings = removefromtabs($course, $sectionid, $sectionnum, $settings);
+
+    // add section number to new tab format settings if not tab0
+    if($tabnum > 0){
+        $settings['tab'.$tabnum] .= ($settings['tab'.$tabnum] === '' ? '' : ',').$sectionid;
+        // save formatsettings to database
+        $DB->set_field('course_format_options', 'value',
+            $settings['tab'.$tabnum], array('courseid' => $course->id, 'name' => 'tab'.$tabnum));
+        $settings['tab'.$tabnum.'_sectionnums'] .= ($settings['tab'.$tabnum.'_sectionnums'] === '' ? '' : ',').$sectionnum;
+        // save formatsettings to database
+        $DB->set_field('course_format_options', 'value',
+            $settings['tab'.$tabnum.'_sectionnums'], array('courseid' => $course->id, 'name' => 'tab'.$tabnum.'_sectionnums'));
+    }
+    return $settings;
+}
+
+// remove section id from all tab format settings
+function removefromtabs($course, $sectionid, $sectionnum, $settings) {
+    global $CFG;
+    global $DB;
+
+    $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
+
+    for($i = 0; $i <= $max_tabs; $i++) {
+        if(strstr($settings['tab'.$i], $sectionid) > -1) {
+            $sections = explode(',', $settings['tab'.$i]);
+            $new_sections = array();
+            foreach($sections as $section) {
+                if($section != $sectionid) {
+                    $new_sections[] = $section;
+                }
+            }
+            $settings['tab'.$i] = implode(',', $new_sections);
+            $DB->set_field('course_format_options', 'value',
+                $settings['tab'.$i], array('courseid' => $course->id, 'name' => 'tab'.$i));
+
+            $section_nums = explode(',', $settings['tab'.$i.'_sectionnums']);
+            $new_section_nums = array();
+            foreach($section_nums as $section_num) {
+                if($section_num != $sectionnum) {
+                    $new_section_nums[] = $section_num;
+                }
+            }
+            $settings['tab'.$i.'_sectionnums'] = implode(',', $new_section_nums);
+            $DB->set_field('course_format_options', 'value',
+                $settings['tab'.$i.'_sectionnums'], array('courseid' => $course->id, 'name' => 'tab'.$i.'_sectionnums'));
+        }
+    }
+    return $settings;
+}
+
