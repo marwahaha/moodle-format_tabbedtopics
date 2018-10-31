@@ -85,9 +85,7 @@ define(['jquery', 'jqueryui'], function($) {
                 $(".active").removeClass("active");
                 $(".modulecontent").addClass("active");
 
-                if(tabid === 'tab_all') { // Show all sections
-                    $("li.section").show();
-                } else if(tabid === 'tab0') { // Show all sections - then hide each section shown in other tabs
+                if(tabid === 'tab0') { // Show all sections - then hide each section shown in other tabs
                     $("#changenumsections").show();
                     $("li.section").show();
                     $(".topictab").each(function(){
@@ -142,6 +140,10 @@ define(['jquery', 'jqueryui'], function($) {
                 } else {
                     console.log('tab with visible sections or blocks - showing it');
                     $(this).parent().show();
+                }
+
+                if($('.tabtopics').length > 0) {
+                    console.log('--> # of tabtopics: '+$('.tabtopics').length);
                 }
 
                 // if option is set when a tab shows a single section only perform some visual tricks
@@ -286,6 +288,25 @@ define(['jquery', 'jqueryui'], function($) {
             };
 
 // ---------------------------------------------------------------------------------------------------------------------
+            // a section name is clicked...
+            $(".list-group-item").click(function(){
+                var sectionname = $(this).find('.media-body').html();
+                var sectionnum = $('.section[aria-label="'+sectionname+'"]').attr('section-id');
+                // find the tab in which the section is
+                var found_it = false;
+                $('.tablink').each(function(){
+                    if($(this).attr('sections').indexOf(sectionnum) > -1){
+                        $(this).click();
+                        found_it = true;
+                        return false;
+                    }
+                });
+                if(!found_it) {
+                    $('#tab0').click();
+                }
+            });
+
+// ---------------------------------------------------------------------------------------------------------------------
             // show all sections when the "Module Content" tab is clicked
             $(".modulecontentlink").click(function(){
                 // hide the content of the assessment info block tab
@@ -312,15 +333,15 @@ define(['jquery', 'jqueryui'], function($) {
 //                if($("input[name='edit']").val() === 'off') { // 'off' actually means 'on' ?!?!
 
                     $('.topictab').parent().draggable({
-//                        containment: '.qmultabs', // allow moving only within qmultabs
+//                        containment: '.tabs', // allow moving only within tabs
 //                        helper: 'clone', // move a clone
                         cursor: 'move',
-                        stack: '.qmultabitem', // make sure the dragged tab is always on top of others
-//                        snap: '.qmultabitem',
+                        stack: '.tabitem', // make sure the dragged tab is always on top of others
+//                        snap: '.tabitem',
                         revert: true,
                     });
                     $('.topictab').parent().droppable({
-                        accept: '.qmultabitem',
+                        accept: '.tabitem',
                         hoverClass: 'hovered',
                         drop: handleTabDropEvent,
                     });

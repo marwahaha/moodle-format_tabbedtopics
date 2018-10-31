@@ -119,7 +119,7 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         $count_tabs = $result['count_tabs'];
 
         // rendering the tab navigation
-        echo html_writer::start_tag('ul', array('class'=>'qmultabs nav nav-tabs row'));
+        echo html_writer::start_tag('ul', array('class'=>'tabs nav nav-tabs row'));
 /*
         // if there are no tabs show the standard "Module Content" tab and hide it otherwise
         echo html_writer::start_tag('li', array('class' => 'qmultabitem nav-item'));
@@ -472,54 +472,48 @@ function prepare_tabs($course, $format_options, $sections) {
 function render_tab($tab) {
     global $DB, $PAGE, $OUTPUT;
     if($tab->sections == '') {
-        echo html_writer::start_tag('li', array('class'=>'qmultabitem nav-item', 'style' => 'display:none;'));
+        echo html_writer::start_tag('li', array('class'=>'tabitem nav-item', 'style' => 'display:none;'));
     } else {
-        echo html_writer::start_tag('li', array('class'=>'qmultabitem nav-item'));
+        echo html_writer::start_tag('li', array('class'=>'tabitem nav-item'));
     }
 
-    if ($tab->id == 'tab_all') {
-        echo html_writer::tag('a', $tab->title,
-            array('data-toggle' => 'tab', 'id' => $tab->id, 'sections' => $tab->sections, 'section_nums' => $tab->section_nums, 'class' => "tablinkx nav-link qmultablink {$tab->name}", 'href' => '#')
-        );
-    } else {
-        $sections_array = explode(',', str_replace(' ', '', $tab->sections));
-        if($sections_array[0]) {
-            while ($sections_array[0] == "0") { // remove any occurences of section-0
-                array_shift($sections_array);
-            }
+    $sections_array = explode(',', str_replace(' ', '', $tab->sections));
+    if($sections_array[0]) {
+        while ($sections_array[0] == "0") { // remove any occurences of section-0
+            array_shift($sections_array);
         }
-
-        if($PAGE->user_is_editing()) {
-            // get the format option record for the given tab - we need the id
-            // if the record does not exist, create it first
-            if(!$DB->record_exists('course_format_options', array('courseid' => $PAGE->course->id, 'name' => $tab->id.'_title'))) {
-                $record = new stdClass();
-                $record->courseid = $PAGE->course->id;
-                $record->format = 'qmultabtc';
-                $record->section = 0;
-                $record->name = $tab->id.'_title';
-                $record->value = 'Tab '.substr($tab->id,3);
-                $DB->insert_record('course_format_options', $record);
-            }
-
-            $format_option_tab = $DB->get_record('course_format_options', array('courseid' => $PAGE->course->id, 'name' => $tab->id.'_title'));
-            $itemid = $format_option_tab->id;
-        } else {
-            $itemid = false;
-        }
-
-        if ($tab->id == 'tab0') {
-            echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink nav-link qmultablink " href="#">';
-        } else {
-            echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink topictab nav-link qmultablink " href="#">';
-        }
-        // render the tab name as inplace_editable
-        $tmpl = new \core\output\inplace_editable('format_tabtopics', 'tabname', $itemid,
-            $PAGE->user_is_editing(),
-            format_string($tab->title), $tab->title, get_string('tabtitle_edithint', 'format_tabtopics'),  get_string('tabtitle_editlabel', 'format_tabtopics', format_string($tab->title)));
-        echo $OUTPUT->render($tmpl);
-        echo "</span>";
     }
+
+    if($PAGE->user_is_editing()) {
+        // get the format option record for the given tab - we need the id
+        // if the record does not exist, create it first
+        if(!$DB->record_exists('course_format_options', array('courseid' => $PAGE->course->id, 'name' => $tab->id.'_title'))) {
+            $record = new stdClass();
+            $record->courseid = $PAGE->course->id;
+            $record->format = 'tabtopics';
+            $record->section = 0;
+            $record->name = $tab->id.'_title';
+            $record->value = 'Tab '.substr($tab->id,3);
+            $DB->insert_record('course_format_options', $record);
+        }
+
+        $format_option_tab = $DB->get_record('course_format_options', array('courseid' => $PAGE->course->id, 'name' => $tab->id.'_title'));
+        $itemid = $format_option_tab->id;
+    } else {
+        $itemid = false;
+    }
+
+    if ($tab->id == 'tab0') {
+        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink nav-link tablink " href="#">';
+    } else {
+        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink topictab nav-link tablink " href="#">';
+    }
+    // render the tab name as inplace_editable
+    $tmpl = new \core\output\inplace_editable('format_tabtopics', 'tabname', $itemid,
+        $PAGE->user_is_editing(),
+        format_string($tab->title), $tab->title, get_string('tabtitle_edithint', 'format_tabtopics'),  get_string('tabtitle_editlabel', 'format_tabtopics', format_string($tab->title)));
+    echo $OUTPUT->render($tmpl);
+    echo "</span>";
     echo html_writer::end_tag('li');
 }
 
