@@ -119,7 +119,7 @@ define(['jquery', 'jqueryui'], function($) {
 
                 var visible_sections=$('li.section:visible').length;
                 var hidden_sections=$('li.section.hidden:visible').length;
-                if ($('.section0_ontop'.length > 0)) {
+                if ($('.section0_ontop').length > 0) {
                     visible_sections--;
                 }
                 console.log('number of visible sections: '+visible_sections);
