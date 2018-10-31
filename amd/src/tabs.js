@@ -277,7 +277,7 @@ define(['jquery', 'jqueryui'], function($) {
 
                 // finally call php to write the data
                 $.ajax({
-                    url: "format/qmultabtc/ajax/update_tab_seq.php",
+                    url: "format/tabtopics/ajax/update_tab_seq.php",
                     type: "POST",
                     data: {'sectionid':sectionid, 'tab_seq':tabSeq},
                     success: function(result){
@@ -306,7 +306,10 @@ define(['jquery', 'jqueryui'], function($) {
                 }
 
                 // make tabs draggable
-                if($("input[name='edit']").val() === 'off') { // 'off' actually means 'on' ?!?!
+                if($('.tablink .fa-pencil').length > 0) {
+//                    console.log('WTF?');
+//                }
+//                if($("input[name='edit']").val() === 'off') { // 'off' actually means 'on' ?!?!
 
                     $('.topictab').parent().draggable({
 //                        containment: '.qmultabs', // allow moving only within qmultabs
