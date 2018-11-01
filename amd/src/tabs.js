@@ -112,8 +112,9 @@ define(['jquery', 'jqueryui'], function($) {
                     $('#section-0').removeClass('sectionxxx');
                 }
 
-                // show section-0 when it should be shown always
-                $('.section0_ontop #section-0').show();
+                // show section-0 always when it should be shown always
+//                $('.section0_ontop #section-0').show();
+                $('#ontop_area #section-0').show();
 
                 var visible_sections=$('li.section:visible').length;
                 var hidden_sections=$('li.section.hidden:visible').length;
@@ -159,6 +160,26 @@ define(['jquery', 'jqueryui'], function($) {
                         restore_section(target);
                     }
                 }
+            });};
+
+// ---------------------------------------------------------------------------------------------------------------------
+            // moving section0 to the ontop area
+            var move_ontop = function () { $(".ontop_mover").on('click', function(){
+                $("#ontop_area").append($(this).closest('.section'));
+            });};
+
+// ---------------------------------------------------------------------------------------------------------------------
+            // moving section0 back into line with others
+            var move_inline = function () { $(".inline_mover").on('click', function(){
+                var sectionid = $(this).closest('.section').attr('section-id');
+                $("#inline_area").append($(this).closest('.section'));
+                // find the former tab for section0 if any and click it
+                $(".tablink").each(function() {
+                    if($(this).attr('sections').indexOf(sectionid) > -1) {
+                        $(this).click();
+                        return false;
+                    }
+                });
             });};
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -246,6 +267,8 @@ define(['jquery', 'jqueryui'], function($) {
                 // re-instantiate the clickability for the just added DOM elements
                 tabclick();
                 tabmove();
+                move_ontop();
+                move_inline();
 
                 // get the new tab sequence and write it back to format options
                 var tabSeq = '';
@@ -301,6 +324,8 @@ define(['jquery', 'jqueryui'], function($) {
             $(document).ready(function() {
                 tabclick();
                 tabmove();
+                move_ontop();
+                move_inline();
 
                 //show the edit menu for section-0 - but not when it's shown above the tabs
                 if($('.section0_ontop').length === 0) {

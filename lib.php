@@ -467,6 +467,12 @@ class format_tabtopics extends format_base {
             case 'removefromtabs':
                 return removefromtabs($PAGE->course, $section, $tcsettings);
                 break;
+            case 'sectionzeroontop':
+                return sectionzeroontop($PAGE->course, $section, $tcsettings);
+                break;
+            case 'sectionzeroinline':
+                return sectionzeroinline($PAGE->course, $section, $tcsettings);
+                break;
         }
 
         // For show/hide actions call the parent method and return the new content for .section_availability element.
@@ -587,6 +593,29 @@ function removefromtabs($course, $section2remove, $settings) {
                 $settings['tab'.$i.'_sectionnums'], array('courseid' => $course->id, 'name' => 'tab'.$i.'_sectionnums'));
         }
     }
+    return $settings;
+}
+
+// show section0 always on top of the tabs
+function sectionzeroontop($course, $section2remove, $settings) {
+    global $CFG;
+    global $DB;
+
+    $DB->set_field('course_format_options', 'value',
+        1, array('courseid' => $course->id, 'name' => 'section0_ontop'));
+
+    return $settings;
+}
+
+
+// show section0 in line with other sections
+function sectionzeroinline($course, $section2remove, $settings) {
+    global $CFG;
+    global $DB;
+
+    $DB->set_field('course_format_options', 'value',
+        0, array('courseid' => $course->id, 'name' => 'section0_ontop'));
+
     return $settings;
 }
 

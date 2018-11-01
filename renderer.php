@@ -97,10 +97,11 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         $sections = $modinfo->get_section_info_all();
 
         // display section-0 on top of tabs if option is checked
+        echo html_writer::start_tag('div', array('id' => 'ontop_area'));
         if($format_options['section0_ontop']) {
             $section0 = $sections[0];
             echo $this->start_section_list();
-            echo html_writer::start_tag('div', array('class' => 'section0_ontop'));
+//            echo html_writer::start_tag('div', array('class' => 'section0_ontop'));
             // 0-section is displayed a little different then the others
             if ($section0->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
                 echo $this->section_header($section0, $course, false, 0);
@@ -108,9 +109,10 @@ class format_tabtopics_renderer extends format_section_renderer_base {
                 echo $this->courserenderer->course_section_add_cm_control($course, 0, 0);
                 echo $this->section_footer();
             }
-            echo html_writer::end_tag('div');
+//            echo html_writer::end_tag('div');
             echo $this->end_section_list();
         }
+        echo html_writer::end_tag('div');
 
         // the tab navigation
         $result = prepare_tabs($course, $format_options, $sections);
@@ -142,7 +144,9 @@ class format_tabtopics_renderer extends format_section_renderer_base {
 
         foreach ($sections as $section => $thissection) {
             if ($section == 0) {
+                echo html_writer::start_tag('div', array('id' => 'inline_area'));
                 if($format_options['section0_ontop']){ // section-0 is already shown on top
+                    echo html_writer::end_tag('div');
                     continue;
                 }
                 // 0-section is displayed a little different then the others
@@ -152,6 +156,7 @@ class format_tabtopics_renderer extends format_section_renderer_base {
                     echo $this->courserenderer->course_section_add_cm_control($course, 0, 0);
                     echo $this->section_footer();
                 }
+                echo html_writer::end_tag('div');
                 continue;
             }
             if ($section > $numsections) {
@@ -267,9 +272,34 @@ class format_tabtopics_renderer extends format_section_renderer_base {
 
         $controls = array();
 
+        // add move to top for section0 only
+        if ($section->section === 0) {
+            $controls['ontop'] = array(
+                "icon" => 't/up',
+                'name' => 'Show always on top',
+
+                'attr' => array(
+                    'tabnr' => 0,
+                    'class' => 'ontop_mover',
+                    'title' => 'Show always on top',
+                    'data-action' => 'sectionzeroontop'
+                )
+            );
+            $controls['inline'] = array(
+                "icon" => 't/down',
+                'name' => 'Show inline',
+
+                'attr' => array(
+                    'tabnr' => 0,
+                    'class' => 'inline_mover',
+                    'title' => 'Show inline',
+                    'data-action' => 'sectionzeroinline'
+                )
+            );
+        }
         // Insert tab moving menu items
         $itemtitle = "Move to Tab ";
-        $actions = array('movetotabzero', 'movetotabone', 'movetotabtwo','movetotabthree','movetotabfour','movetotabfive','movetotabsix','movetotabseven','movetotabeight','movetotabnine','movetotabten');
+        $actions = array('movetotabzero', 'movetotabone', 'movetotabtwo','movetotabthree','movetotabfour','movetotabfive','movetotabsix','movetotabseven','movetotabeight','movetotabnine','movetotabten', 'sectionzeroontop', 'sectionzeroinline');
         for($i = 0; $i <= $max_tabs; $i++) {
             $tabname = 'tab'.$i.'_title';
             $itemname = 'To Tab "'.($course->$tabname ? $course->$tabname : $i).'"';
