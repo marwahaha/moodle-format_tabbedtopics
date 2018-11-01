@@ -212,16 +212,7 @@ define(['jquery', 'jqueryui'], function($) {
                 // and vice versa otherwise...
                 var visible_tabs = $(".topictab:visible").length;
                 console.log('visible tabs: '+visible_tabs);
-                if($(".topictab:visible").length === 0) {
-                    console.log('NO tabs present - showing original content module tab');
-                    $(".modulecontentlink").fadeIn(1000);
-//                    $("#tab0").parent().fadeOut(500);
-                    $(".modulecontentlink").click();
-                } else {
-                    console.log('tabs present - hide original content module tab');
-//                    $("#tab0").parent().fadeIn(1000);
-                    $(".modulecontentlink").fadeOut(500);
-
+                if($(".topictab:visible").length > 0) {
                     // if the last section of a tab was moved click the target tab
                     // otherwise click the active tab to refresh it
                     if($('li.section:visible').length > 1) {
@@ -307,16 +298,6 @@ define(['jquery', 'jqueryui'], function($) {
             });
 
 // ---------------------------------------------------------------------------------------------------------------------
-            // show all sections when the "Module Content" tab is clicked
-            $(".modulecontentlink").click(function(){
-                // hide the content of the assessment info block tab
-                $('.assessment_info_content').hide();
-                $("li.section").show();
-                $("li.section.hiding").addClass("hidden");
-                $("li.section.hidden").removeClass("hiding");
-            });
-
-// ---------------------------------------------------------------------------------------------------------------------
             $(document).ready(function() {
                 tabclick();
                 tabmove();
@@ -326,11 +307,8 @@ define(['jquery', 'jqueryui'], function($) {
                     $("#section-0 .right.side").show();
                 }
 
-                // make tabs draggable
+                // make tabs draggable when in edit mode (the pencil class is present)
                 if($('.tablink .fa-pencil').length > 0) {
-//                    console.log('WTF?');
-//                }
-//                if($("input[name='edit']").val() === 'off') { // 'off' actually means 'on' ?!?!
 
                     $('.topictab').parent().draggable({
 //                        containment: '.tabs', // allow moving only within tabs
@@ -348,16 +326,10 @@ define(['jquery', 'jqueryui'], function($) {
                 }
 
                 // if there is no visible tab show/click the module content tab
-                if($(".topictab:visible").length === 0) {
-                    $(".modulecontentlink").show();
-//                    $("#tab0").parent().hide();
-                    $(".modulecontentlink").click();
-                } else {
-                    $(".modulecontentlink").hide();
-                    //click all tablinks once to potentially reveal any section names as tab names
+                if($(".topictab:visible").length > 0) {
+                    //click all visible tablinks once to potentially reveal any section names as tab names
                     $('#tab0').click();
-                    $('.tablink').click();
-//                    $("#tab0").parent().show();
+                    $('.tablink:visible').click();
                     // click the 1st visible tab by default
                     $('.tablink:visible').first().click();
                 }

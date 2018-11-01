@@ -92,11 +92,11 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         // Copy activity clipboard..
         echo $this->course_activity_clipboard($course, 0);
 
-        // Now the list of sections..
-//        echo $this->start_section_list();
+        // Now on to the main stage..
         $numsections = course_get_format($course)->get_last_section_number();
         $sections = $modinfo->get_section_info_all();
-        // display section-0 on top of tabs
+
+        // display section-0 on top of tabs if option is checked
         if($format_options['section0_ontop']) {
             $section0 = $sections[0];
             echo $this->start_section_list();
@@ -112,30 +112,13 @@ class format_tabtopics_renderer extends format_section_renderer_base {
             echo $this->end_section_list();
         }
 
-
-
+        // the tab navigation
         $result = prepare_tabs($course, $format_options, $sections);
         $tabs = $result['tabs'];
-        $count_tabs = $result['count_tabs'];
 
         // rendering the tab navigation
         echo html_writer::start_tag('ul', array('class'=>'tabs nav nav-tabs row'));
-/*
-        // if there are no tabs show the standard "Module Content" tab and hide it otherwise
-        echo html_writer::start_tag('li', array('class' => 'qmultabitem nav-item'));
-        if($count_tabs == 0) {
-            echo html_writer::tag('a', get_string('modulecontent', 'format_tabtopics'),
-                array('data-toggle' => 'tab', 'class' => 'qmultablink nav-link active modulecontentlink', 'href' => '#modulecontent')
-            );
-        } else {
-            echo html_writer::tag('a', get_string('modulecontent', 'format_tabtopics'),
-                array('data-toggle' => 'tab', 'class' => 'qmultablink nav-link active modulecontentlink', 'style' => 'display:none;')
-            );
-        }
-        echo html_writer::end_tag('li');
-*/
 
-        // the new tab navigation
         $tab_seq = array();
         if ($format_options['tab_seq']) {
             $tab_seq = explode(',',$format_options['tab_seq']);
@@ -154,13 +137,7 @@ class format_tabtopics_renderer extends format_section_renderer_base {
 
         }
 
-
-
-
-
-
-
-
+        // the sections
         echo $this->start_section_list();
 
         foreach ($sections as $section => $thissection) {
@@ -506,7 +483,7 @@ function render_tab($tab) {
     if ($tab->id == 'tab0') {
         echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink nav-link tablink " href="#">';
     } else {
-        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink topictab nav-link tablink " href="#">';
+        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink topictab nav-link tablink " href="#" style="'.($PAGE->user_is_editing() ? 'cursor: move;' : '').'">';
     }
     // render the tab name as inplace_editable
     $tmpl = new \core\output\inplace_editable('format_tabtopics', 'tabname', $itemid,
