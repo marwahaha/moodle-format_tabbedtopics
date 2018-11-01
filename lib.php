@@ -432,40 +432,40 @@ class format_tabtopics extends format_base {
 
         switch ($action) {
             case 'movetotabzero':
-                return move2tab(0, $section->id, $section->section, $tcsettings);
+                return move2tab(0, $section, $tcsettings);
                 break;
             case 'movetotabone':
-                return move2tab(1, $section->id, $section->section, $tcsettings);
+                return move2tab(1, $section, $tcsettings);
                 break;
             case 'movetotabtwo':
-                return move2tab(2, $section->id, $section->section, $tcsettings);
+                return move2tab(2, $section, $tcsettings);
                 break;
             case 'movetotabthree':
-                return move2tab(3, $section->id, $section->section, $tcsettings);
+                return move2tab(3, $section, $tcsettings);
                 break;
             case 'movetotabfour':
-                return move2tab(4, $section->id, $section->section, $tcsettings);
+                return move2tab(4, $section, $tcsettings);
                 break;
             case 'movetotabfive':
-                return move2tab(5, $section->id, $section->section, $tcsettings);
+                return move2tab(5, $section, $tcsettings);
                 break;
             case 'movetotabsix':
-                return move2tab(6, $section->id, $section->section, $tcsettings);
+                return move2tab(6, $section, $tcsettings);
                 break;
             case 'movetotabseven':
-                return move2tab(7, $section->id, $section->section, $tcsettings);
+                return move2tab(7, $section, $tcsettings);
                 break;
             case 'movetotabeight':
-                return move2tab(8, $section->id, $section->section, $tcsettings);
+                return move2tab(8, $section, $tcsettings);
                 break;
             case 'movetotabnine':
-                return move2tab(9, $section->id, $section->section, $tcsettings);
+                return move2tab(9, $section, $tcsettings);
                 break;
             case 'movetotabten':
-                return move2tab(10, $section->id, $section->section, $tcsettings);
+                return move2tab(10, $section, $tcsettings);
                 break;
             case 'removefromtabs':
-                return removefromtabs($PAGE->course, $section->id, $section->section, $tcsettings);
+                return removefromtabs($PAGE->course, $section, $tcsettings);
                 break;
         }
 
@@ -487,14 +487,6 @@ class format_tabtopics extends format_base {
         return $this->get_format_options();
     }
 }
-/**
- * Implements callback inplace_editable() allowing to edit values in-place.
- *
- * @param string $itemtype
- * @param int $itemidÏ
- * @param mixed $newvalue
- * @return \core\output\inplace_editable
- */
 
 /**
  * Implements callback inplace_editable() allowing to edit values in-place
@@ -539,24 +531,23 @@ function format_tabtopics_inplace_editable($itemtype, $itemid, $newvalue) {
     }
 }
 
-
 // move section ID and section number to tab format settings of a given tab
-function move2tab($tabnum, $sectionid, $sectionnum, $settings) {
+function move2tab($tabnum, $section2move, $settings) {
     global $PAGE;
     global $DB;
 
     $course = $PAGE->course;
 
     // remove section number from all tab format settings
-    $settings = removefromtabs($course, $sectionid, $sectionnum, $settings);
+    $settings = removefromtabs($course, $section2move, $settings);
 
     // add section number to new tab format settings if not tab0
     if($tabnum > 0){
-        $settings['tab'.$tabnum] .= ($settings['tab'.$tabnum] === '' ? '' : ',').$sectionid;
+        $settings['tab'.$tabnum] .= ($settings['tab'.$tabnum] === '' ? '' : ',').$section2move->id;
         // save formatsettings to database
         $DB->set_field('course_format_options', 'value',
             $settings['tab'.$tabnum], array('courseid' => $course->id, 'name' => 'tab'.$tabnum));
-        $settings['tab'.$tabnum.'_sectionnums'] .= ($settings['tab'.$tabnum.'_sectionnums'] === '' ? '' : ',').$sectionnum;
+        $settings['tab'.$tabnum.'_sectionnums'] .= ($settings['tab'.$tabnum.'_sectionnums'] === '' ? '' : ',').$section2move->section;
         // save formatsettings to database
         $DB->set_field('course_format_options', 'value',
             $settings['tab'.$tabnum.'_sectionnums'], array('courseid' => $course->id, 'name' => 'tab'.$tabnum.'_sectionnums'));
@@ -565,18 +556,18 @@ function move2tab($tabnum, $sectionid, $sectionnum, $settings) {
 }
 
 // remove section id from all tab format settings
-function removefromtabs($course, $sectionid, $sectionnum, $settings) {
+function removefromtabs($course, $section2remove, $settings) {
     global $CFG;
     global $DB;
 
     $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
 
     for($i = 0; $i <= $max_tabs; $i++) {
-        if(strstr($settings['tab'.$i], $sectionid) > -1) {
+        if(strstr($settings['tab'.$i], $section2remove->id) > -1) {
             $sections = explode(',', $settings['tab'.$i]);
             $new_sections = array();
             foreach($sections as $section) {
-                if($section != $sectionid) {
+                if($section != $section2remove->id) {
                     $new_sections[] = $section;
                 }
             }
@@ -587,7 +578,7 @@ function removefromtabs($course, $sectionid, $sectionnum, $settings) {
             $section_nums = explode(',', $settings['tab'.$i.'_sectionnums']);
             $new_section_nums = array();
             foreach($section_nums as $section_num) {
-                if($section_num != $sectionnum) {
+                if($section_num != $section2remove->section) {
                     $new_section_nums[] = $section_num;
                 }
             }
