@@ -432,46 +432,46 @@ class format_tabtopics extends format_base {
 
         switch ($action) {
             case 'movetotabzero':
-                return move2tab(0, $section, $tcsettings);
+                return $this->move2tab(0, $section, $tcsettings);
                 break;
             case 'movetotabone':
-                return move2tab(1, $section, $tcsettings);
+                return $this->move2tab(1, $section, $tcsettings);
                 break;
             case 'movetotabtwo':
-                return move2tab(2, $section, $tcsettings);
+                return $this->move2tab(2, $section, $tcsettings);
                 break;
             case 'movetotabthree':
-                return move2tab(3, $section, $tcsettings);
+                return $this->move2tab(3, $section, $tcsettings);
                 break;
             case 'movetotabfour':
-                return move2tab(4, $section, $tcsettings);
+                return $this->move2tab(4, $section, $tcsettings);
                 break;
             case 'movetotabfive':
-                return move2tab(5, $section, $tcsettings);
+                return $this->move2tab(5, $section, $tcsettings);
                 break;
             case 'movetotabsix':
-                return move2tab(6, $section, $tcsettings);
+                return $this->move2tab(6, $section, $tcsettings);
                 break;
             case 'movetotabseven':
-                return move2tab(7, $section, $tcsettings);
+                return $this->move2tab(7, $section, $tcsettings);
                 break;
             case 'movetotabeight':
-                return move2tab(8, $section, $tcsettings);
+                return $this->move2tab(8, $section, $tcsettings);
                 break;
             case 'movetotabnine':
-                return move2tab(9, $section, $tcsettings);
+                return $this->move2tab(9, $section, $tcsettings);
                 break;
             case 'movetotabten':
-                return move2tab(10, $section, $tcsettings);
+                return $this->move2tab(10, $section, $tcsettings);
                 break;
             case 'removefromtabs':
-                return removefromtabs($PAGE->course, $section, $tcsettings);
+                return $this->removefromtabs($PAGE->course, $section, $tcsettings);
                 break;
             case 'sectionzeroontop':
-                return sectionzeroontop($PAGE->course, $section, $tcsettings);
+                return $this->sectionzeroswitch($tcsettings, true);
                 break;
             case 'sectionzeroinline':
-                return sectionzeroinline($PAGE->course, $section, $tcsettings);
+                return $this->sectionzeroswitch($tcsettings, false);
                 break;
         }
 
@@ -480,6 +480,75 @@ class format_tabtopics extends format_base {
         $renderer = $PAGE->get_renderer('format_tabtopics');
         $rv['section_availability'] = $renderer->section_availability($this->get_section($section));
         return $rv;
+    }
+
+    /**
+     * Deletes a section
+     *
+     * Do not call this function directly, instead call {@link course_delete_section()}
+     *
+     * @param int|stdClass|section_info $section
+     * @param bool $forcedeleteifnotempty if set to false section will not be deleted if it has modules in it.
+     * @return bool whether section was deleted
+     */
+    public function delete_section($section, $forcedeleteifnotempty = false) {
+        global $DB;
+        if (!$this->uses_sections()) {
+            // Not possible to delete section if sections are not used.
+            return false;
+        }
+        if (!is_object($section)) {
+            $section = $DB->get_record('course_sections', array('course' => $this->get_courseid(), 'section' => $section),
+                'id,section,sequence,summary');
+        }
+        if (!$section || !$section->section) {
+            // Not possible to delete 0-section.
+            return false;
+        }
+
+        if (!$forcedeleteifnotempty && (!empty($section->sequence) || !empty($section->summary))) {
+            return false;
+        }
+
+        $course = $this->get_course();
+
+        // remove section from any tabs
+        if($section->section > -1) {
+            $this->removefromtabs($course, $section, $this->get_format_options());
+        }
+
+        // Remove the marker if it points to this section.
+        if ($section->section == $course->marker) {
+            course_set_marker($course->id, 0);
+        }
+
+        $lastsection = $DB->get_field_sql('SELECT max(section) from {course_sections}
+                            WHERE course = ?', array($course->id));
+
+        // Find out if we need to descrease the 'numsections' property later.
+        $courseformathasnumsections = array_key_exists('numsections',
+            $this->get_format_options());
+        $decreasenumsections = $courseformathasnumsections && ($section->section <= $course->numsections);
+
+        // Move the section to the end.
+        move_section_to($course, $section->section, $lastsection, true);
+
+        // Delete all modules from the section.
+        foreach (preg_split('/,/', $section->sequence, -1, PREG_SPLIT_NO_EMPTY) as $cmid) {
+            course_delete_module($cmid);
+        }
+
+        // Delete section and it's format options.
+        $DB->delete_records('course_format_options', array('sectionid' => $section->id));
+        $DB->delete_records('course_sections', array('id' => $section->id));
+        rebuild_course_cache($course->id, true);
+
+        // Descrease 'numsections' if needed.
+        if ($decreasenumsections) {
+            $this->update_course_format_options(array('numsections' => $course->numsections - 1));
+        }
+
+        return true;
     }
 
     /**
@@ -492,6 +561,66 @@ class format_tabtopics extends format_base {
         // Return everything (nothing to hide).
         return $this->get_format_options();
     }
+
+// move section ID and section number to tab format settings of a given tab
+    public function move2tab($tabnum, $section2move, $settings) {
+        global $PAGE;
+        global $DB;
+
+        $course = $PAGE->course;
+
+        // remove section number from all tab format settings
+        $settings = $this->removefromtabs($course, $section2move, $settings);
+
+        // add section number to new tab format settings if not tab0
+        if($tabnum > 0){
+            $settings['tab'.$tabnum] .= ($settings['tab'.$tabnum] === '' ? '' : ',').$section2move->id;
+            $settings['tab'.$tabnum.'_sectionnums'] .= ($settings['tab'.$tabnum.'_sectionnums'] === '' ? '' : ',').$section2move->section;
+            $this->update_course_format_options($settings);
+        }
+        return $settings;
+    }
+
+// remove section id from all tab format settings
+    public function removefromtabs($course, $section2remove, $settings) {
+        global $CFG;
+        global $DB;
+
+        $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
+
+        for($i = 0; $i <= $max_tabs; $i++) {
+            if(strstr($settings['tab'.$i], $section2remove->id) > -1) {
+                $sections = explode(',', $settings['tab'.$i]);
+                $new_sections = array();
+                foreach($sections as $section) {
+                    if($section != $section2remove->id) {
+                        $new_sections[] = $section;
+                    }
+                }
+                $settings['tab'.$i] = implode(',', $new_sections);
+
+                $section_nums = explode(',', $settings['tab'.$i.'_sectionnums']);
+                $new_section_nums = array();
+                foreach($section_nums as $section_num) {
+                    if($section_num != $section2remove->section) {
+                        $new_section_nums[] = $section_num;
+                    }
+                }
+                $settings['tab'.$i.'_sectionnums'] = implode(',', $new_section_nums);
+                $this->update_course_format_options($settings);
+            }
+        }
+        return $settings;
+    }
+
+// switch to show section0 always on top of the tabs
+    public function sectionzeroswitch($settings, $value) {
+        $settings['section0_ontop'] = $value;
+        $this->update_course_format_options($settings);
+
+        return $settings;
+    }
+
 }
 
 /**
@@ -535,87 +664,5 @@ function format_tabtopics_inplace_editable($itemtype, $itemid, $newvalue) {
 
         return $output;
     }
-}
-
-// move section ID and section number to tab format settings of a given tab
-function move2tab($tabnum, $section2move, $settings) {
-    global $PAGE;
-    global $DB;
-
-    $course = $PAGE->course;
-
-    // remove section number from all tab format settings
-    $settings = removefromtabs($course, $section2move, $settings);
-
-    // add section number to new tab format settings if not tab0
-    if($tabnum > 0){
-        $settings['tab'.$tabnum] .= ($settings['tab'.$tabnum] === '' ? '' : ',').$section2move->id;
-        // save formatsettings to database
-        $DB->set_field('course_format_options', 'value',
-            $settings['tab'.$tabnum], array('courseid' => $course->id, 'name' => 'tab'.$tabnum));
-        $settings['tab'.$tabnum.'_sectionnums'] .= ($settings['tab'.$tabnum.'_sectionnums'] === '' ? '' : ',').$section2move->section;
-        // save formatsettings to database
-        $DB->set_field('course_format_options', 'value',
-            $settings['tab'.$tabnum.'_sectionnums'], array('courseid' => $course->id, 'name' => 'tab'.$tabnum.'_sectionnums'));
-    }
-    return $settings;
-}
-
-// remove section id from all tab format settings
-function removefromtabs($course, $section2remove, $settings) {
-    global $CFG;
-    global $DB;
-
-    $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
-
-    for($i = 0; $i <= $max_tabs; $i++) {
-        if(strstr($settings['tab'.$i], $section2remove->id) > -1) {
-            $sections = explode(',', $settings['tab'.$i]);
-            $new_sections = array();
-            foreach($sections as $section) {
-                if($section != $section2remove->id) {
-                    $new_sections[] = $section;
-                }
-            }
-            $settings['tab'.$i] = implode(',', $new_sections);
-            $DB->set_field('course_format_options', 'value',
-                $settings['tab'.$i], array('courseid' => $course->id, 'name' => 'tab'.$i));
-
-            $section_nums = explode(',', $settings['tab'.$i.'_sectionnums']);
-            $new_section_nums = array();
-            foreach($section_nums as $section_num) {
-                if($section_num != $section2remove->section) {
-                    $new_section_nums[] = $section_num;
-                }
-            }
-            $settings['tab'.$i.'_sectionnums'] = implode(',', $new_section_nums);
-            $DB->set_field('course_format_options', 'value',
-                $settings['tab'.$i.'_sectionnums'], array('courseid' => $course->id, 'name' => 'tab'.$i.'_sectionnums'));
-        }
-    }
-    return $settings;
-}
-
-// show section0 always on top of the tabs
-function sectionzeroontop($course, $section2remove, $settings) {
-    global $CFG;
-    global $DB;
-
-    $DB->set_field('course_format_options', 'value',
-        1, array('courseid' => $course->id, 'name' => 'section0_ontop'));
-
-    return $settings;
-}
-
-
-// show section0 in line with other sections
-function sectionzeroinline($course, $section2remove, $settings) {
-    global $CFG;
-    global $DB;
-
-    $DB->set_field('course_format_options', 'value',
-        0, array('courseid' => $course->id, 'name' => 'section0_ontop'));
-
-    return $settings;
 }
 

@@ -136,8 +136,8 @@ class format_tabtopics_renderer extends format_section_renderer_base {
             foreach ($tabs as $tab) {
                 render_tab($tab);
             }
-
         }
+        echo html_writer::end_tag('ul');
 
         // the sections
         echo $this->start_section_list();
@@ -272,7 +272,7 @@ class format_tabtopics_renderer extends format_section_renderer_base {
 
         $controls = array();
 
-        // add move to top for section0 only
+        // add move to/from top for section0 only
         if ($section->section === 0) {
             $controls['ontop'] = array(
                 "icon" => 't/up',
@@ -297,6 +297,7 @@ class format_tabtopics_renderer extends format_section_renderer_base {
                 )
             );
         }
+
         // Insert tab moving menu items
         $itemtitle = "Move to Tab ";
         $actions = array('movetotabzero', 'movetotabone', 'movetotabtwo','movetotabthree','movetotabfour','movetotabfive','movetotabsix','movetotabseven','movetotabeight','movetotabnine','movetotabten', 'sectionzeroontop', 'sectionzeroinline');

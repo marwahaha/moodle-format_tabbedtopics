@@ -79,9 +79,6 @@ define(['jquery', 'jqueryui'], function($) {
                 }
                 console.log('Clicked tab "'+clicked_tab_name+'":');
 
-                // hide the content of the assessment info block tab
-                $('.assessment_info_content').hide();
-
                 $(".active").removeClass("active");
                 $(".modulecontent").addClass("active");
 
@@ -108,12 +105,7 @@ define(['jquery', 'jqueryui'], function($) {
                     });
                 }
 
-                if ($('.section0_ontop'.length > 0)) {
-                    $('#section-0').removeClass('sectionxxx');
-                }
-
                 // show section-0 always when it should be shown always
-//                $('.section0_ontop #section-0').show();
                 $('#ontop_area #section-0').show();
 
                 var visible_sections=$('li.section:visible').length;
@@ -163,9 +155,22 @@ define(['jquery', 'jqueryui'], function($) {
             });};
 
 // ---------------------------------------------------------------------------------------------------------------------
+            // hide the the current tab from the tab move options
+            var dropdown_toggle = function () { $(".dropdown-toggle").on('click', function(){
+                var sectionid = $(this).closest('.section').attr('id');
+                if(sectionid !== 'section-0') {
+                    var tabnum = $('.tablink.active').attr('id').substring(3);
+                    $('#'+sectionid+' .tab_mover').show(); // 1st show all options
+                    $('#'+sectionid+' .tab_mover[tabnr="'+tabnum+'"]').hide(); // then hide the one not needed
+                }
+            });};
+// ---------------------------------------------------------------------------------------------------------------------
             // moving section0 to the ontop area
             var move_ontop = function () { $(".ontop_mover").on('click', function(){
                 $("#ontop_area").append($(this).closest('.section'));
+                $("#section-0 .inline_mover").show();
+                $("#section-0 .tab_mover").hide();
+                $("#section-0 .ontop_mover").hide();
             });};
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -180,6 +185,9 @@ define(['jquery', 'jqueryui'], function($) {
                         return false;
                     }
                 });
+                $("#section-0 .inline_mover").hide();
+                $("#section-0 .tab_mover").show();
+                $("#section-0 .ontop_mover").show();
             });};
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -269,6 +277,7 @@ define(['jquery', 'jqueryui'], function($) {
                 tabmove();
                 move_ontop();
                 move_inline();
+                dropdown_toggle();
 
                 // get the new tab sequence and write it back to format options
                 var tabSeq = '';
@@ -326,6 +335,7 @@ define(['jquery', 'jqueryui'], function($) {
                 tabmove();
                 move_ontop();
                 move_inline();
+                dropdown_toggle();
 
                 //show the edit menu for section-0 - but not when it's shown above the tabs
                 if($('.section0_ontop').length === 0) {
@@ -350,13 +360,23 @@ define(['jquery', 'jqueryui'], function($) {
                     });
                 }
 
-                // if there is no visible tab show/click the module content tab
+                // if there are visible tabs click them all once to potentially reveal any section names as tab names
                 if($(".topictab:visible").length > 0) {
-                    //click all visible tablinks once to potentially reveal any section names as tab names
                     $('#tab0').click();
                     $('.tablink:visible').click();
                     // click the 1st visible tab by default
                     $('.tablink:visible').first().click();
+                }
+
+                // if section0 is on top restrict section menu - restore otherwise
+                if($("#ontop_area").html().length > 0) {
+                    $("#section-0 .inline_mover").show();
+                    $("#section-0 .tab_mover").hide();
+                    $("#section-0 .ontop_mover").hide();
+                } else {
+                    $("#section-0 .inline_mover").hide();
+                    $("#section-0 .tab_mover").show();
+                    $("#section-0 .ontop_mover").show();
                 }
             });
         }
