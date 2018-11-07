@@ -41,3 +41,7 @@
 .tablink.active {
     background-color: #fcfcfc !important;
 }
+
+.sectionname {
+    padding-top: 10px !important;
+}
