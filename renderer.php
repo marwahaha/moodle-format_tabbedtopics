@@ -101,15 +101,15 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         if($format_options['section0_ontop']) {
             $section0 = $sections[0];
             echo $this->start_section_list();
-//            echo html_writer::start_tag('div', array('class' => 'section0_ontop'));
+            echo html_writer::start_tag('div', array('class' => 'section0_ontop'));
             // 0-section is displayed a little different then the others
             if ($section0->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
-                echo $this->section_header($section0, $course, false, 0);
+                echo $this->section0_ontop_header($section0, $course, false, 0);
                 echo $this->courserenderer->course_section_cm_list($course, $section0, 0);
                 echo $this->courserenderer->course_section_add_cm_control($course, 0, 0);
                 echo $this->section_footer();
             }
-//            echo html_writer::end_tag('div');
+            echo html_writer::end_tag('div');
             echo $this->end_section_list();
         }
         echo html_writer::end_tag('div');
@@ -261,6 +261,7 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         }
 
         $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
+        $max_tabs = ($max_tabs < 10 ? $max_tabs : 9 ); // Restrict tabs to 10 max (0...9)
         $coursecontext = context_course::instance($course->id);
 
         if ($onsectionpage) {
@@ -441,6 +442,64 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         return $o;
     }
 
+    protected function section0_ontop_header($section, $course, $onsectionpage, $sectionreturn=null) {
+        global $PAGE;
+
+        $o = '';
+        $currenttext = '';
+        $sectionstyle = '';
+
+        if ($section->section != 0) {
+            // Only in the non-general sections.
+            if (!$section->visible) {
+                $sectionstyle = ' hidden';
+            }
+            if (course_get_format($course)->is_section_current($section)) {
+                $sectionstyle = ' current';
+            }
+        }
+
+        $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section, 'section-id' => $section->id,
+            'class' => 'section ontop main clearfix'.$sectionstyle, 'role'=>'region',
+            'aria-label'=> get_section_name($course, $section)));
+
+        // Create a span that contains the section title to be used to create the keyboard section move menu.
+        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
+
+        $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
+
+        $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
+        $o.= html_writer::start_tag('div', array('class' => 'content'));
+
+        // When not on a section page, we display the section titles except the general section if null
+        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
+
+        // When on a section page, we only display the general section title, if title is not the default one
+        $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
+
+        $classes = ' accesshide';
+        if ($hasnamenotsecpg || $hasnamesecpg) {
+            $classes = '';
+        }
+        $sectionname = html_writer::tag('span', $this->section_title($section, $course));
+        $o.= $this->output->heading($sectionname, 3, 'sectionname' . $classes);
+
+//        $o .= $this->section_availability($section);
+
+//        $o .= html_writer::start_tag('div', array('class' => 'summary'));
+        if ($section->uservisible || $section->visible) {
+            // Show summary if section is available or has availability restriction information.
+            // Do not show summary if section is hidden but we still display it because of course setting
+            // "Hidden sections are shown in collapsed form".
+            $o .= $this->format_summary_text($section);
+        }
+//        $o .= html_writer::end_tag('div');
+
+        return $o;
+    }
+
 }
 
 function prepare_tabs($course, $format_options, $sections) {
@@ -512,9 +571,9 @@ function render_tab($tab) {
     }
 
     if ($tab->id == 'tab0') {
-        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink nav-link tablink " href="#">';
+        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink nav-link " href="">';
     } else {
-        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink topictab nav-link tablink " href="#" style="'.($PAGE->user_is_editing() ? 'cursor: move;' : '').'">';
+        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink topictab nav-link " href="" style="'.($PAGE->user_is_editing() ? 'cursor: move;' : '').'">';
     }
     // render the tab name as inplace_editable
     $tmpl = new \core\output\inplace_editable('format_tabtopics', 'tabname', $itemid,

@@ -14,7 +14,6 @@
 }
 
 .course-content ul.tabtopics li.section .left {
-    padding-top: 22px;
     text-align: right;
 }
 
@@ -38,10 +37,27 @@
     border-style: solid !important;
 }
 
+.tablink {
+    margin-right: 5px;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+    border-width: thin;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-color: lightgrey;
+    border-style: solid ;
+}
+
 .tablink.active {
-    background-color: #fcfcfc !important;
+    background-color: #fcfcfc;
 }
 
 .sectionname {
     padding-top: 10px !important;
+}
+
+li.section.ontop {
+    border-bottom: 0px !important;
 }

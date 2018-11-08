@@ -5,8 +5,6 @@ define(['jquery', 'jqueryui'], function($) {
 // ---------------------------------------------------------------------------------------------------------------------
             var change_tab = function(tab, target) {
                 console.log('single section in tab - performing some magic...');
-                // if the section is collapsed click it to un-collapse
-                target.find('.toggle_closed').click();
 
                 // turn the section head into a temp headline
                 target.find('.sectionhead').addClass('temp-headline');
@@ -70,6 +68,10 @@ define(['jquery', 'jqueryui'], function($) {
 
                 console.log('----');
 
+                // make this an active tab
+                $(".active").removeClass("active"); // first remove any active class
+                $(this).addClass('active'); // then add the class to the clicked tab
+
                 var clicked_tab_name;
                 if($(this).find('.inplaceeditable-text')) {
                     clicked_tab_name = $(this).find('.inplaceeditable-text').attr('data-value');
@@ -78,9 +80,6 @@ define(['jquery', 'jqueryui'], function($) {
                     clicked_tab_name = $(this).html();
                 }
                 console.log('Clicked tab "'+clicked_tab_name+'":');
-
-                $(".active").removeClass("active");
-                $(".modulecontent").addClass("active");
 
                 if(tabid === 'tab0') { // Show all sections - then hide each section shown in other tabs
                     $("#changenumsections").show();
@@ -111,6 +110,7 @@ define(['jquery', 'jqueryui'], function($) {
                 var visible_sections=$('li.section:visible').length;
                 var hidden_sections=$('li.section.hidden:visible').length;
                 if ($('.section0_ontop').length > 0) {
+                    console.log('section0 is on top - so reducing the number of visible sections for this tab by 1');
                     visible_sections--;
                 }
                 console.log('number of visible sections: '+visible_sections);
@@ -128,10 +128,11 @@ define(['jquery', 'jqueryui'], function($) {
                 }
 
                 if(visible_sections < 1) {
-                    console.log('tab with no visible sections or blocks - hiding it');
+                    console.log('tab with no visible sections - hiding it');
                     $(this).parent().hide();
                 } else {
-                    console.log('tab with visible sections or blocks - showing it');
+                    console.log('tab with visible sections - showing it');
+//                    $('#'+tabid).show();
                     $(this).parent().show();
                 }
 
@@ -158,7 +159,7 @@ define(['jquery', 'jqueryui'], function($) {
             // hide the the current tab from the tab move options
             var dropdown_toggle = function () { $(".dropdown-toggle").on('click', function(){
                 var sectionid = $(this).closest('.section').attr('id');
-                if(sectionid !== 'section-0') {
+                if(sectionid !== 'section-0' && typeof $('.tablink.active').attr('id') !== 'undefined') {
                     var tabnum = $('.tablink.active').attr('id').substring(3);
                     $('#'+sectionid+' .tab_mover').show(); // 1st show all options
                     $('#'+sectionid+' .tab_mover[tabnr="'+tabnum+'"]').hide(); // then hide the one not needed
@@ -168,6 +169,7 @@ define(['jquery', 'jqueryui'], function($) {
             // moving section0 to the ontop area
             var move_ontop = function () { $(".ontop_mover").on('click', function(){
                 $("#ontop_area").append($(this).closest('.section'));
+                $("#ontop_area").addClass('section0_ontop');
                 $("#section-0 .inline_mover").show();
                 $("#section-0 .tab_mover").hide();
                 $("#section-0 .ontop_mover").hide();
@@ -178,6 +180,8 @@ define(['jquery', 'jqueryui'], function($) {
             var move_inline = function () { $(".inline_mover").on('click', function(){
                 var sectionid = $(this).closest('.section').attr('section-id');
                 $("#inline_area").append($(this).closest('.section'));
+                // remove the 'section0_ontop' class
+                $('.section0_ontop').removeClass('section0_ontop');
                 // find the former tab for section0 if any and click it
                 $(".tablink").each(function() {
                     if($(this).attr('sections').indexOf(sectionid) > -1) {
@@ -195,7 +199,8 @@ define(['jquery', 'jqueryui'], function($) {
             var tabmove = function () { $(".tab_mover").on('click', function(){
                 var tabnum = $(this).attr('tabnr');  // this is the tab number where the section is moved to
                 var sectionid = $(this).closest('li.section').attr('section-id');
-                var sectionnum = $(this).parent().parent().parent().parent().parent().parent().parent().attr('id').substring(8);
+                var sectionnum = $(this).closest('li.section').attr('id').substring(8);
+
                 console.log('--> found section num: '+sectionnum);
                 var active_tabid = $('.topictab.active').first().attr('id');
                 var target = $(".section[section-id='"+sectionid+"']");
@@ -229,9 +234,9 @@ define(['jquery', 'jqueryui'], function($) {
                         $("#tab"+tabnum).attr('section_nums', $("#tab"+tabnum).attr('section_nums')+","+sectionnum);
                         console.log('---> section_nums: '+$("#tab"+tabnum).attr('section_nums'));
                     }
-                    $("#tab"+tabnum).click();
-                    $('#'+active_tabid).click();
                 }
+                $("#tab"+tabnum).click();
+                $('#'+active_tabid).click();
 
                 //restore the section before moving it in case it was a single
                 restore_tab($('#tab'+tabnum));
@@ -241,20 +246,27 @@ define(['jquery', 'jqueryui'], function($) {
                 // and vice versa otherwise...
                 var visible_tabs = $(".topictab:visible").length;
                 console.log('visible tabs: '+visible_tabs);
-                if($(".topictab:visible").length > 0) {
-                    // if the last section of a tab was moved click the target tab
-                    // otherwise click the active tab to refresh it
-                    if($('li.section:visible').length > 1) {
-                        console.log('staying with the current tab (id = '+active_tabid+
-                            ') as there are still '+$('li.section:visible').length+' sections left');
-                        $("#tab"+tabnum).click();
-                        $('#'+active_tabid).click();
-                    } else {
-                        console.log('no section in active tab id '+
-                            active_tabid+' left - hiding it and following section to new tab nr '+tabnum);
-                        $("#tab"+tabnum).click();
-                        $('#'+active_tabid).parent().hide();
-                    }
+
+                // if the last section of a tab was moved click the target tab
+                // otherwise click the active tab to refresh it
+                var countable_sections = $('li.section:visible').length-($("#ontop_area").html().length > 0 ? 1 : 0);
+                console.log('---> vivible sections = '+$('li.section:visible').length);
+                console.log('---> countable_sections = '+countable_sections);
+                if(countable_sections > 0 && $('li.section:visible').length >= countable_sections) {
+                    console.log('staying with the current tab (id = '+active_tabid+
+                        ') as there are still '+$('li.section:visible').length+' sections left');
+                    $("#tab"+tabnum).click();
+                    $('#'+active_tabid).click();
+                } else {
+                    console.log('no section in active tab id '+
+                        active_tabid+' left - hiding it and following section to new tab nr '+tabnum);
+                    $("#tab"+tabnum).click();
+                    $('#'+active_tabid).parent().hide();
+                }
+                if($(".tabtopics:visible").length === 0) {
+                    console.log('only '+$(".tabtopics:visible").length+' visible tab - showing all sections and hiding the tab');
+                    $("li.section").show();
+                    $(".tablink").hide();
                 }
             });};
 
