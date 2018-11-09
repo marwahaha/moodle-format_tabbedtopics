@@ -129,7 +129,7 @@ define(['jquery', 'jqueryui'], function($) {
 
                 // if tab0 is alone hide it
                 if(tabid === 'tab0' && $('.tabitem:visible').length === 1) {
-                    console.log('--> tab0 is a single tab - hiding it')
+                    console.log('--> tab0 is a single tab - hiding it');
                     $('.tabitem').hide();
                 }
             });};
@@ -182,7 +182,6 @@ define(['jquery', 'jqueryui'], function($) {
 
                 console.log('--> found section num: '+sectionnum);
                 var active_tabid = $('.topictab.active').first().attr('id');
-                var target = $(".section[section-id='"+sectionid+"']");
 
                 if(typeof active_tabid == 'undefined') {
                     active_tabid = 'tab0';
@@ -219,7 +218,6 @@ define(['jquery', 'jqueryui'], function($) {
 
                 //restore the section before moving it in case it was a single
                 restore_tab($('#tab'+tabnum));
-//                restore_section(target);
 
                 // when there is no visible tab hide tab0 and show/click the module content tab
                 // and vice versa otherwise...
