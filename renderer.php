@@ -53,7 +53,8 @@ class format_tabtopics_renderer extends format_section_renderer_base {
      * Generate the starting container html for a list of sections
      * @return string HTML to output.
      */
-    protected function start_section_list() {
+    function start_section_list() {
+        global $PAGE;
         return html_writer::start_tag('ul', array('class' => 'tabtopics'));
     }
 
@@ -100,7 +101,13 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         echo html_writer::start_tag('div', array('id' => 'ontop_area'));
         if($format_options['section0_ontop']) {
             $section0 = $sections[0];
-            echo $this->start_section_list();
+//            echo $this->start_section_list();
+            if($format_options['single_section_tabs']) {
+                echo html_writer::start_tag('ul', array('class' => 'tabtopics single_section_tabs'));
+            } else {
+                echo html_writer::start_tag('ul', array('class' => 'tabtopics'));
+            }
+
             echo html_writer::start_tag('div', array('class' => 'section0_ontop'));
             // 0-section is displayed a little different then the others
             if ($section0->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
@@ -140,7 +147,12 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         echo html_writer::end_tag('ul');
 
         // the sections
-        echo $this->start_section_list();
+//        echo $this->start_section_list();
+        if($format_options['single_section_tabs']) {
+            echo html_writer::start_tag('ul', array('class' => 'tabtopics single_section_tabs'));
+        } else {
+            echo html_writer::start_tag('ul', array('class' => 'tabtopics'));
+        }
 
         foreach ($sections as $section => $thissection) {
             if ($section == 0) {
@@ -571,9 +583,9 @@ function render_tab($tab) {
     }
 
     if ($tab->id == 'tab0') {
-        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink nav-link " href="">';
+        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink nav-link " tab_title="'.$tab->title.'">';
     } else {
-        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink topictab nav-link " href="" style="'.($PAGE->user_is_editing() ? 'cursor: move;' : '').'">';
+        echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink topictab nav-link " tab_title="'.$tab->title.'" style="'.($PAGE->user_is_editing() ? 'cursor: move;' : '').'">';
     }
     // render the tab name as inplace_editable
     $tmpl = new \core\output\inplace_editable('format_tabtopics', 'tabname', $itemid,

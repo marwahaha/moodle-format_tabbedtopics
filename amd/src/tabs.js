@@ -6,26 +6,15 @@ define(['jquery', 'jqueryui'], function($) {
             var change_tab = function(tab, target) {
                 console.log('single section in tab - performing some magic...');
 
-                // turn the section head into a temp headline
-                target.find('.sectionhead').addClass('temp-headline');
-                $('.temp-headline').removeClass('sectionhead');
-                $('.temp-headline').removeClass('toggle-switch');
-                target.find('.the_toggle').addClass('the_toggle_disabled');
-                $('.the_toggle_disabled').removeClass('the_toggle');
-
                 // replace the tab name with the section title
                 var orig_sectionname=target.find('.sectionname');
-                if($("input[name='edit']").val() === 'off') { // 'off' actually means 'on' ?!?!
-                    var old_title = tab.find("span[data-itemtype='tabname']");
-                    old_title.addClass('d-inline-flex-disabled');
-                    old_title.removeClass('d-inline-flex');
-                    old_title.hide();
-                    tab.append(orig_sectionname.html());
-                    orig_sectionname.addClass('hidden_sectionname');
-                    orig_sectionname.removeClass('sectionname');
-                    orig_sectionname.hide();
-                } else {
-                    tab.html(orig_sectionname.html());
+
+                if($('.tabname_backup').length === 0){
+                    var tab_sectionname = orig_sectionname.clone();
+                    tab.parent().append(tab.clone().addClass('tabname_backup').hide());
+                    tab.html(tab_sectionname.find('span')).addClass('tabsectionname');
+
+                    // hide the original sectionname
                     orig_sectionname.hide();
                 }
             };
@@ -33,30 +22,19 @@ define(['jquery', 'jqueryui'], function($) {
 // ---------------------------------------------------------------------------------------------------------------------
             var restore_section = function(target) {
                 // reveal the original sectionname
-                var orig_sectionname=target.find('.hidden_sectionname');
-                orig_sectionname.addClass('sectionname');
-                orig_sectionname.removeClass('hidden_sectionname');
-                orig_sectionname.show();
-
-                // turn the temp headline back into a section head
-                $('.temp-headline').addClass('sectionhead');
-                $('.temp-headline').addClass('toggle-switch');
-                $('.temp-headline').removeClass('temp-headline');
-                $('.the_toggle_disabled').addClass('the_toggle');
-                $('.the_toggle_disabled').removeClass('the_toggle_disabled');
+                $('.sectionname').show();
                 console.log('--> restoring section headline ');
-//                console.log(target);
-//                console.log(orig_sectionname);
             };
 
 // ---------------------------------------------------------------------------------------------------------------------
             var restore_tab = function(tab) {
-                // replace any section title as tab title with the real tab title again
-                var old_title = tab.find("span[data-itemtype='tabname']");
-                tab.find("span[data-itemtype='sectionname']").first().remove();
-                old_title.removeClass('d-inline-flex-disabled');
-                old_title.addClass('d-inline-flex');
-                old_title.show();
+                // restore the tab name from the backup
+                $('.tabsectionname').html($('.tabname_backup').html());
+                $('.tabname_backup').remove();
+
+                // reveal the original sectionname
+                $('.sectionname').show();
+                console.log('--> restoring section headline ');
             };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -136,22 +114,24 @@ define(['jquery', 'jqueryui'], function($) {
                     $(this).parent().show();
                 }
 
-                if($('.tabtopics').length > 0) {
-                    console.log('--> # of tabtopics: '+$('.tabtopics').length);
-                }
-
                 // if option is set when a tab shows a single section only perform some visual tricks
-                if($('.single_section_tab').length  > 0) {
+                if($('.single_section_tabs').length  > 0) {
                     var target = $('li.section:visible').first();
                     var first_section_id = $('li.section:visible').first().attr('id');
                     if(visible_sections === 1 && first_section_id != 'section-0' &&
                         !$('li.section:visible').first().hasClass('hidden')&&
                         !$('li.section:visible').first().hasClass('stealth')) {
                         change_tab($(this), target);
-                    } else if($("input[name='edit']").val() === 'off' && first_section_id != 'section-0') {
+                    } else if($('.tablink .fa-pencil').length > 0 && first_section_id != 'section-0') {
                         restore_tab($(this));
-                        restore_section(target);
+//                        restore_section(target);
                     }
+                }
+
+                // if tab0 is alone hide it
+                if(tabid === 'tab0' && $('.tabitem:visible').length === 1) {
+                    console.log('--> tab0 is a single tab - hiding it')
+                    $('.tabitem').hide();
                 }
             });};
 
@@ -240,7 +220,7 @@ define(['jquery', 'jqueryui'], function($) {
 
                 //restore the section before moving it in case it was a single
                 restore_tab($('#tab'+tabnum));
-                restore_section(target);
+//                restore_section(target);
 
                 // when there is no visible tab hide tab0 and show/click the module content tab
                 // and vice versa otherwise...
@@ -262,11 +242,6 @@ define(['jquery', 'jqueryui'], function($) {
                         active_tabid+' left - hiding it and following section to new tab nr '+tabnum);
                     $("#tab"+tabnum).click();
                     $('#'+active_tabid).parent().hide();
-                }
-                if($(".tabtopics:visible").length === 0) {
-                    console.log('only '+$(".tabtopics:visible").length+' visible tab - showing all sections and hiding the tab');
-                    $("li.section").show();
-                    $(".tablink").hide();
                 }
             });};
 
