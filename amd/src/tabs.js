@@ -9,7 +9,7 @@ define(['jquery', 'jqueryui'], function($) {
                 // replace the tab name with the section title
                 var orig_sectionname=target.find('.sectionname');
 
-                if($('.tabname_backup').length === 0){
+                if($('.tabname_backup:visible').length === 0){
                     var tab_sectionname = orig_sectionname.clone();
                     tab.parent().append(tab.clone().addClass('tabname_backup').hide());
                     tab.html(tab_sectionname.find('span')).addClass('tabsectionname');
@@ -20,17 +20,12 @@ define(['jquery', 'jqueryui'], function($) {
             };
 
 // ---------------------------------------------------------------------------------------------------------------------
-            var restore_section = function(target) {
-                // reveal the original sectionname
-                $('.sectionname').show();
-                console.log('--> restoring section headline ');
-            };
-
-// ---------------------------------------------------------------------------------------------------------------------
             var restore_tab = function(tab) {
                 // restore the tab name from the backup
-                $('.tabsectionname').html($('.tabname_backup').html());
-                $('.tabname_backup').remove();
+                var the_backup = tab.parent().find('.tabname_backup');
+                var the_tab = tab.parent().find('.tabsectionname').removeClass('tabsectionname');
+                the_tab.html(the_backup.html());
+                the_backup.remove();
 
                 // reveal the original sectionname
                 $('.sectionname').show();
@@ -116,15 +111,19 @@ define(['jquery', 'jqueryui'], function($) {
 
                 // if option is set when a tab shows a single section only perform some visual tricks
                 if($('.single_section_tabs').length  > 0) {
-                    var target = $('li.section:visible').first();
-                    var first_section_id = $('li.section:visible').first().attr('id');
+                    // if section0 is shown always on top ignore the first visible section and use the 2nd
+                    if ($('.section0_ontop').length > 0) {
+                        var target = $('li.section:visible:eq(1)');
+                    } else {
+                        var target = $('li.section:visible').first();
+                    }
+                    var first_section_id = target.attr('id');
                     if(visible_sections === 1 && first_section_id != 'section-0' &&
                         !$('li.section:visible').first().hasClass('hidden')&&
                         !$('li.section:visible').first().hasClass('stealth')) {
                         change_tab($(this), target);
                     } else if($('.tablink .fa-pencil').length > 0 && first_section_id != 'section-0') {
                         restore_tab($(this));
-//                        restore_section(target);
                     }
                 }
 
