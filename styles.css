@@ -48,6 +48,7 @@
     border-top-right-radius: 3px;
     border-color: lightgrey;
     border-style: solid ;
+    cursor: pointer;
 }
 
 .tablink.active {

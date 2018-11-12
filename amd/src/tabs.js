@@ -93,7 +93,7 @@ define(['jquery', 'jqueryui'], function($) {
                     $(this).addClass('tab-not-shown');
                     if($('#not-shown-hint-'+tabid).length === 0) {
                         var hint_text = "This tab contains only hidden sections and will not be shown to students";
-                        $(this).append('<i id="not-shown-hint-'+tabid+'" class="fa fa-info" title="'+hint_text+'"></i>');
+                        $(this).append('&nbsp;<i id="not-shown-hint-'+tabid+'" class="fa fa-info" title="'+hint_text+'"></i>');
                     }
                 } else {
                     $(this).removeClass('tab-not-shown');
@@ -122,7 +122,7 @@ define(['jquery', 'jqueryui'], function($) {
                         !$('li.section:visible').first().hasClass('hidden')&&
                         !$('li.section:visible').first().hasClass('stealth')) {
                         change_tab($(this), target);
-                    } else if($('.tablink .fa-pencil').length > 0 && first_section_id != 'section-0') {
+                    } else if($('.inplaceeditable').length > 0 && first_section_id != 'section-0') {
                         restore_tab($(this));
                     }
                 }
@@ -327,7 +327,7 @@ define(['jquery', 'jqueryui'], function($) {
                 }
 
                 // make tabs draggable when in edit mode (the pencil class is present)
-                if($('.tablink .fa-pencil').length > 0) {
+                if($('.inplaceeditable').length > 0) {
 
                     $('.topictab').parent().draggable({
 //                        containment: '.tabs', // allow moving only within tabs
