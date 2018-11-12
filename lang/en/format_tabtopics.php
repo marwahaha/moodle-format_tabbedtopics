@@ -56,3 +56,5 @@ $string['tabname'] = 'Tab';
 $string['tabzero_title'] = 'Module Content';
 $string['tabtitle_edithint'] = 'Edit tab name';
 $string['tabtitle_editlabel'] = 'New value for {a}';
+
+$string['hidden_tab_hint'] = 'This tab contains only hidden sections and will not be shown to students';

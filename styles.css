@@ -62,3 +62,7 @@
 li.section.ontop {
     border-bottom: 0px !important;
 }
+
+.fa-info {
+    padding-left: 5px;
+}
