@@ -310,20 +310,30 @@ define(['jquery', 'jqueryui'], function($) {
 
 // ---------------------------------------------------------------------------------------------------------------------
             // a section name is clicked...
-            $(".list-group-item").click(function(){
-                var sectionname = $(this).find('.media-body').html();
-                var sectionnum = $('.section[aria-label="'+sectionname+'"]').attr('section-id');
-                // find the tab in which the section is
-                var found_it = false;
-                $('.tablink').each(function(){
-                    if($(this).attr('sections').indexOf(sectionnum) > -1){
-                        $(this).click();
-                        found_it = true;
-                        return false;
+            $(".block_navigation axxx").click(function(){
+                alert('I feel clicked...');
+            });
+
+// ---------------------------------------------------------------------------------------------------------------------
+            // a link to an URL is clicked - so check if there is a section ID in it and reveal the corresponding tab...
+            $("a").click(function(){
+                var sectionid = $(this).attr('href').split('#')[1];
+                // if the link contains a section ID (e.g. is NOT undefined) click the corresponding tab
+                if(typeof sectionid !== 'undefined') {
+                    var sectionnum = $('#'+sectionid).attr('section-id');
+//                    alert(sectionnum);
+                    // find the tab in which the section is
+                    var found_it = false;
+                    $('.tablink').each(function(){
+                        if($(this).attr('sections').indexOf(sectionnum) > -1){
+                            $(this).click();
+                            found_it = true;
+                            return false;
+                        }
+                    });
+                    if(!found_it) {
+                        $('#tab0').click();
                     }
-                });
-                if(!found_it) {
-                    $('#tab0').click();
                 }
             });
 
