@@ -66,3 +66,7 @@ li.section.ontop {
 .fa-info {
     padding-left: 5px;
 }
+
+.edit_only {
+    opacity: 0.4;
+}
