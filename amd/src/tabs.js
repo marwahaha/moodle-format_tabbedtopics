@@ -230,7 +230,7 @@ define(['jquery', 'jqueryui'], function($) {
 
                 // if the last section of a tab was moved click the target tab
                 // otherwise click the active tab to refresh it
-                var countable_sections = $('li.section:visible').length-($("#ontop_area").html().length > 0 ? 1 : 0);
+                var countable_sections = $('li.section:visible').length-($("#ontop_area").hasClass('section0_ontop') ? 1 : 0);
                 console.log('---> visible sections = '+$('li.section:visible').length);
                 console.log('---> countable_sections = '+countable_sections);
                 if(countable_sections > 0 && $('li.section:visible').length >= countable_sections) {
@@ -269,7 +269,7 @@ define(['jquery', 'jqueryui'], function($) {
                 });
             }); };
 
-// --------------------------------------------------------------------------------------------------------------------- <==
+// ---------------------------------------------------------------------------------------------------------------------
             // a section edit menu is clicked
             // hide the the current tab from the tab move options of the section edit menu
             // if this is section0 do some extra stuff
@@ -438,7 +438,7 @@ define(['jquery', 'jqueryui'], function($) {
                 }
 
                 // if section0 is on top restrict section menu - restore otherwise
-                if($("#ontop_area").html().length > 0) {
+                if($("#ontop_area").hasClass('section0_ontop')) {
                     $("#section-0 .inline_mover").show();
                     $("#section-0 .tab_mover").hide();
                     $("#section-0 .ontop_mover").hide();
