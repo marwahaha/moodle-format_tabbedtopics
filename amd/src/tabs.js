@@ -299,7 +299,7 @@ define(['jquery', 'jqueryui'], function($) {
 
 // ---------------------------------------------------------------------------------------------------------------------
             // what to do if a tab has been dropped onto another
-            var handleTabDropEvent = function ( event, ui ) {
+            var handleTabDropEvent = function( event, ui ) {
                 var dragged_tab = ui.draggable.find('.topictab').first();
                 var target_tab = $(this).find('.topictab').first();
                 var dragged_tab_id = ui.draggable.find('.topictab').first().attr('id');
@@ -347,6 +347,28 @@ define(['jquery', 'jqueryui'], function($) {
             // a section name is clicked...
             $(".block_navigation axxx").click(function(){
                 alert('I feel clicked...');
+            });
+
+// ---------------------------------------------------------------------------------------------------------------------
+            // a link to an URL is clicked - so check if there is a section ID in it and reveal the corresponding tab...
+            $("a").click(function(){
+                var sectionid = $(this).attr('href').split('#')[1];
+                // If the link contains a section ID (e.g. is NOT undefined) click the corresponding tab
+                if(typeof sectionid !== 'undefined') {
+                    var sectionnum = $('#'+sectionid).attr('section-id');
+                    // Find the tab in which the section is
+                    var foundIt = false;
+                    $('.tablink').each(function(){
+                        if($(this).attr('sections').indexOf(sectionnum) > -1){
+                            $(this).click();
+                            foundIt = true;
+                            return false;
+                        }
+                    });
+                    if(!foundIt) {
+                        $('#tab0').click();
+                    }
+                }
             });
 
 // ---------------------------------------------------------------------------------------------------------------------
