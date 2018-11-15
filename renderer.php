@@ -98,8 +98,8 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         $sections = $modinfo->get_section_info_all();
 
         // display section-0 on top of tabs if option is checked
-        echo html_writer::start_tag('div', array('id' => 'ontop_area'));
         if($format_options['section0_ontop']) {
+            echo html_writer::start_tag('div', array('id' => 'ontop_area', 'class' => 'section0_ontop'));
             $section0 = $sections[0];
 //            echo $this->start_section_list();
             if($format_options['single_section_tabs']) {
@@ -108,7 +108,6 @@ class format_tabtopics_renderer extends format_section_renderer_base {
                 echo html_writer::start_tag('ul', array('class' => 'tabtopics'));
             }
 
-            echo html_writer::start_tag('div', array('class' => 'section0_ontop'));
             // 0-section is displayed a little different then the others
             if ($section0->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
                 echo $this->section0_ontop_header($section0, $course, false, 0);
@@ -116,9 +115,11 @@ class format_tabtopics_renderer extends format_section_renderer_base {
                 echo $this->courserenderer->course_section_add_cm_control($course, 0, 0);
                 echo $this->section_footer();
             }
-            echo html_writer::end_tag('div');
             echo $this->end_section_list();
+        } else {
+            echo html_writer::start_tag('div', array('id' => 'ontop_area'));
         }
+
         echo html_writer::end_tag('div');
 
         // the tab navigation
@@ -458,7 +459,6 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         global $PAGE;
 
         $o = '';
-        $currenttext = '';
         $sectionstyle = '';
 
         if ($section->section != 0) {

@@ -2,7 +2,7 @@ define(['jquery', 'jqueryui'], function($) {
     /*eslint no-console: ["error", { allow: ["log", "warn", "error"] }] */
     return {
         init: function() {
-// --------------------------------------------------------------------------------------------------------------------- <==
+// ---------------------------------------------------------------------------------------------------------------------
             // when a single section is shown under a tab use the section name as tab name
             var changeTab = function(tab, target) {
                 console.log('single section in tab: using section name as tab name');
@@ -180,7 +180,7 @@ define(['jquery', 'jqueryui'], function($) {
 // ---------------------------------------------------------------------------------------------------------------------
             // moving a section to a tab by menu
             var tabMove = function() { $(".tab_mover").on('click', function(){
-                var tabnum = $(this).attr('tabnr');  // this is the tab number where the section is moved to
+                var tabnum = $(this).attr('tabnr');  // this is the tab number where the section is motabseved to
                 var sectionid = $(this).closest('li.section').attr('section-id');
                 var sectionnum = $(this).closest('li.section').attr('id').substring(8);
 
@@ -251,9 +251,6 @@ define(['jquery', 'jqueryui'], function($) {
             var moveOntop = function() { $(".ontop_mover").on('click', function(){
                 $("#ontop_area").append($(this).closest('.section'));
                 $("#ontop_area").addClass('section0_ontop');
-                $("#section-0 .inline_mover").show();
-                $("#section-0 .tab_mover").hide();
-                $("#section-0 .ontop_mover").hide();
             });};
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -270,20 +267,58 @@ define(['jquery', 'jqueryui'], function($) {
                         return false;
                     }
                 });
-                $("#section-0 .inline_mover").hide();
-                $("#section-0 .tab_mover").show();
-                $("#section-0 .ontop_mover").show();
             }); };
 
-// ---------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------- <==
+            // a section edit menu is clicked
             // hide the the current tab from the tab move options of the section edit menu
+            // if this is section0 do some extra stuff
             var dropdownToggle = function() { $(".menubar").on('click', function(){
                 var sectionid = $(this).closest('.section').attr('id');
-                console.log('hiding section ' + sectionid + ' from menu');
                 $('#'+sectionid+' .tab_mover').show(); // 1st show all options
-                if (sectionid !== 'section-0' && typeof $('.tablink.active').attr('id') !== 'undefined') {
+
+                // replace all tabnames with the actual names shown in tabs
+                // Get the current tab names
+                var tabArray = [];
+                var tracknames = []; // tracking the tab names so to use each only once
+                $('.tablink').each(function() {
+                    var tabname = '';
+                    var trackname = $(this).attr('tab_title');
+                    var tabid = $(this).attr('id').substr(3);
+                    if ($(this).hasClass('tabsectionname')) {
+                        tabname = $(this).html();
+                    } else {
+                        tabname = $(this).attr('tab_title');
+                    }
+                    if($.inArray(trackname,tracknames) < 0) {
+                        tabArray[tabid] = tabname;
+                        tracknames.push(trackname);
+                    }
+                });
+
+                // Updating menu options with current tab names
+                console.log('--> Updating menu options with current tab names');
+                $(this).parent().find('.tab_mover').each(function() {
+                    var tabnr = $(this).attr('tabnr');
+                    var tabtext = $(this).find('.menu-action-text').html();
+                    console.log(tabnr + ' --> ' + tabtext + ' ==> ' + tabArray[tabnr]);
+                    $(this).find('.menu-action-text').html('To Tab "' + tabArray[tabnr] + '"');
+                });
+
+                if (sectionid === 'section-0') {
+                    if ($('#ontop_area.section0_ontop').length === 1) { // if section0 is on top don't show tab options
+                        $("#section-0 .inline_mover").show();
+                        $("#section-0 .tab_mover").addClass('tab_mover_bak').removeClass('tab_mover').hide();
+                        $("#section-0 .ontop_mover").hide();
+                    } else {
+                        $("#section-0 .inline_mover").hide();
+                        $("#section-0 .tab_mover_bak").addClass('tab_mover').removeClass('tab_mover_bak').show();
+                        $("#section-0 .ontop_mover").show();
+                    }
+                } else if (typeof $('.tablink.active').attr('id') !== 'undefined') {
                     var tabnum = $('.tablink.active').attr('id').substring(3);
                     $('#' + sectionid + ' .tab_mover[tabnr="' + tabnum+'"]').hide(); // Then hide the one not needed
+                    console.log('hiding tab ' + tabnum + ' from edit menu for section '+sectionid);
                 }
             });};
 
@@ -344,29 +379,25 @@ define(['jquery', 'jqueryui'], function($) {
             };
 
 // ---------------------------------------------------------------------------------------------------------------------
-            // a section name is clicked...
-            $(".block_navigation axxx").click(function(){
-                alert('I feel clicked...');
-            });
-
-// ---------------------------------------------------------------------------------------------------------------------
-            // a link to an URL is clicked - so check if there is a section ID in it and reveal the corresponding tab...
+            // A link to an URL is clicked - check if there is a section ID in it and if so reveal the corresponding tab
             $("a").click(function(){
-                var sectionid = $(this).attr('href').split('#')[1];
-                // If the link contains a section ID (e.g. is NOT undefined) click the corresponding tab
-                if(typeof sectionid !== 'undefined') {
-                    var sectionnum = $('#'+sectionid).attr('section-id');
-                    // Find the tab in which the section is
-                    var foundIt = false;
-                    $('.tablink').each(function(){
-                        if($(this).attr('sections').indexOf(sectionnum) > -1){
-                            $(this).click();
-                            foundIt = true;
-                            return false;
+                if ($(this).attr('href') !== '#') {
+                    var sectionid = $(this).attr('href').split('#')[1];
+                    // If the link contains a section ID (e.g. is NOT undefined) click the corresponding tab
+                    if(typeof sectionid !== 'undefined') {
+                        var sectionnum = $('#'+sectionid).attr('section-id');
+                        // Find the tab in which the section is
+                        var foundIt = false;
+                        $('.tablink').each(function(){
+                            if($(this).attr('sections').indexOf(sectionnum) > -1){
+                                $(this).click();
+                                foundIt = true;
+                                return false;
+                            }
+                        });
+                        if(!foundIt) {
+                            $('#tab0').click();
                         }
-                    });
-                    if(!foundIt) {
-                        $('#tab0').click();
                     }
                 }
             });
