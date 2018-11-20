@@ -180,7 +180,7 @@ define(['jquery', 'jqueryui'], function($) {
 // ---------------------------------------------------------------------------------------------------------------------
             // moving a section to a tab by menu
             var tabMove = function() { $(".tab_mover").on('click', function(){
-                var tabnum = $(this).attr('tabnr');  // this is the tab number where the section is motabseved to
+                var tabnum = $(this).attr('tabnr');  // This is the tab number where the section is motabseved to
                 var sectionid = $(this).closest('li.section').attr('section-id');
                 var sectionnum = $(this).closest('li.section').attr('id').substring(8);
 
@@ -193,7 +193,7 @@ define(['jquery', 'jqueryui'], function($) {
                 console.log('----');
                 console.log('moving section '+sectionid+' from tab "'+active_tabid+'" to tab nr '+tabnum);
 
-                // remove the section id and section number from any tab
+                // Remove the section id and section number from any tab
                 $(".tablink").each(function(){
                     $(this).attr('sections',$(this).attr('sections').replace(","+sectionid,""));
                     $(this).attr('sections',$(this).attr('sections').replace(sectionid+",",""));
@@ -203,14 +203,14 @@ define(['jquery', 'jqueryui'], function($) {
                     $(this).attr('section_nums',$(this).attr('section_nums').replace(sectionnum+",",""));
                     $(this).attr('section_nums',$(this).attr('section_nums').replace(sectionnum,""));
                 });
-                // now add the sectionid to the new tab
-                if(tabnum > 0) { // no need to store section ids for tab 0
-                    if($("#tab"+tabnum).attr('sections').length === 0) {
+                // Add the sectionid to the new tab
+                if (tabnum > 0) { // no need to store section ids for tab 0
+                    if ($("#tab"+tabnum).attr('sections').length === 0) {
                         $("#tab"+tabnum).attr('sections', $("#tab"+tabnum).attr('sections')+sectionid);
                     } else {
                         $("#tab"+tabnum).attr('sections', $("#tab"+tabnum).attr('sections')+","+sectionid);
                     }
-                    if($("#tab"+tabnum).attr('section_nums').length === 0) {
+                    if ($("#tab"+tabnum).attr('section_nums').length === 0) {
                         $("#tab"+tabnum).attr('section_nums', $("#tab"+tabnum).attr('section_nums')+sectionnum);
                     } else {
                         $("#tab"+tabnum).attr('section_nums', $("#tab"+tabnum).attr('section_nums')+","+sectionnum);
@@ -220,15 +220,15 @@ define(['jquery', 'jqueryui'], function($) {
                 $("#tab"+tabnum).click();
                 $('#'+active_tabid).click();
 
-                //restore the section before moving it in case it was a single
+                // Restore the section before moving it in case it was a single
                 restore_tab($('#tab'+tabnum));
 
-                // when there is no visible tab hide tab0 and show/click the module content tab
+                // When there is no visible tab hide tab0 and show/click the module content tab
                 // and vice versa otherwise...
                 var visible_tabs = $(".topictab:visible").length;
                 console.log('visible tabs: '+visible_tabs);
 
-                // if the last section of a tab was moved click the target tab
+                // If the last section of a tab was moved click the target tab
                 // otherwise click the active tab to refresh it
                 var countable_sections = $('li.section:visible').length-($("#ontop_area").hasClass('section0_ontop') ? 1 : 0);
                 console.log('---> visible sections = '+$('li.section:visible').length);
@@ -248,26 +248,31 @@ define(['jquery', 'jqueryui'], function($) {
 
 // ---------------------------------------------------------------------------------------------------------------------
             // moving section0 to the ontop area
-            var moveOntop = function() { $(".ontop_mover").on('click', function(){
-                $("#ontop_area").append($(this).closest('.section'));
-                $("#ontop_area").addClass('section0_ontop');
-            });};
+            var moveOntop = function() {
+                $(".ontop_mover").on('click', function() {
+                    $("#ontop_area").append($(this).closest('.section'));
+                    $("#ontop_area").addClass('section0_ontop');
+                });
+            };
 
 // ---------------------------------------------------------------------------------------------------------------------
             // moving section0 back into line with others
-            var moveInline = function() { $(".inline_mover").on('click', function(){
-                var sectionid = $(this).closest('.section').attr('section-id');
-                $("#inline_area").append($(this).closest('.section'));
-                // Remove the 'section0_ontop' class
-                $('.section0_ontop').removeClass('section0_ontop');
-                // Find the former tab for section0 if any and click it
-                $(".tablink").each(function() {
-                    if($(this).attr('sections').indexOf(sectionid) > -1) {
-                        $(this).click();
+            var moveInline = function() {
+                $(".inline_mover").on('click', function(){
+                    var sectionid = $(this).closest('.section').attr('section-id');
+                    $("#inline_area").append($(this).closest('.section'));
+                    // Remove the 'section0_ontop' class
+                    $('.section0_ontop').removeClass('section0_ontop');
+                    // Find the former tab for section0 if any and click it
+                    $(".tablink").each(function() {
+                        if ($(this).attr('sections').indexOf(sectionid) > -1) {
+                            $(this).click();
+                            return false;
+                        }
                         return false;
-                    }
+                    });
                 });
-            }); };
+            };
 
 // ---------------------------------------------------------------------------------------------------------------------
             // a section edit menu is clicked
@@ -280,7 +285,7 @@ define(['jquery', 'jqueryui'], function($) {
                 // replace all tabnames with the actual names shown in tabs
                 // Get the current tab names
                 var tabArray = [];
-                var tracknames = []; // tracking the tab names so to use each only once
+                var tracknames = []; // Tracking the tab names so to use each only once
                 $('.tablink').each(function() {
                     var tabname = '';
                     var trackname = $(this).attr('tab_title');
@@ -288,7 +293,9 @@ define(['jquery', 'jqueryui'], function($) {
                     if ($(this).hasClass('tabsectionname')) {
                         tabname = $(this).html();
                     } else {
-                        tabname = $(this).attr('tab_title');
+//                        tabname = $(this).attr('tab_title');
+                        tabname = $(this).find('.inplaceeditable').attr('data-value');
+
                     }
                     if($.inArray(trackname,tracknames) < 0) {
                         tabArray[tabid] = tabname;

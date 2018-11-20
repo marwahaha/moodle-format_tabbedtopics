@@ -75,6 +75,12 @@ class restore_format_tabtopics_plugin extends restore_format_plugin {
         return [new restore_path_element('dummy_course', $this->get_pathfor('/dummycourse'))];
     }
 
+    public function process_format_tabtopics() {
+
+    }
+    public function process_tabtopics() {
+
+    }
     /**
      * Dummy process method
      */
