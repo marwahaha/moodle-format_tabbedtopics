@@ -34,7 +34,7 @@ In the course settings for this format you may enable the option to treat single
 
 When a section is the single section for a tab, the tab name will be replaced by the topic name. At the same time the header of the section is hidden to avoid showing the same name twice.
 <h4>Edit a Single Topic Tab name</h4>
-You cannot edit a topic name shown as a tab name directly. For this reason when in edit mode only the topic header is indeed shown again. You them may edit the topic name as usual. Any confirmed changes will then immediately be reflected in the tab name as well.
+You cannot edit a topic name shown as a tab name directly. For this reason only when in edit mode the topic header is indeed shown again. You them may edit the topic name as usual. Any confirmed changes will then immediately be reflected in the tab name as well.
 
 Section 0
 ---------
