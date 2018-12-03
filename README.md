@@ -1,4 +1,4 @@
-# moodle-format_tabtopics
+# moodle-format_tabbedtopics
 This course format adds tab-abilties to the standard Moodle Topics format.
 
 Initially the page rendering is identical to Topics - it is then only in edit mode that you will discover some changes.
