@@ -2,12 +2,13 @@
 This course format adds tab-abilties to the standard Moodle Topics format.
 
 Initially the page rendering is identical to Topics - it is then only in edit mode that you will discover some changes.
-When tabs are shown and a page is loaded the left-most visible tab is always made the active one.
 
 Assigining Sections to Tabs
 ----
 To assign a section to a tab you need to be in edit mode. Then from the section edit menu chose one of the options named "To Tab ...". The section then will immediately been moved there.
 If this is the 1st section assigned to a tab it will appear, removing the last section from a tab will have it removed again. Clicking on it will show the assigned section(s).
+
+When tabs are shown and a page is loaded the left-most visible tab is always made the active one.
 
 The "Module Content" tab
 ----
