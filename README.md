@@ -35,6 +35,8 @@ Single Topics Tabs
 In the course settings for this format you may enable the option to treat single topics for a tab differently:
 - When a topic is the single topic for a tab, the tab name will be replaced by the topic name.
 - At the same time the header of the section is hidden to avoid showing the same name twice.
+
+<b>Please note</b> that when this option is set the first topic assigned to a tab will swap the tab name for the topic name - while assigning a second topic to the same tab will immediately change it back to the original tab name.
 <h4>Edit a Single Topic Tab name</h4>
 You cannot edit a topic name shown as a tab name directly. For this reason only when in edit mode the topic header is indeed shown again. You them may edit the topic name as usual. Any confirmed changes will then immediately be reflected in the tab name as well.
 
