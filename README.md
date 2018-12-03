@@ -15,7 +15,7 @@ The "Module Content" tab
 ------------------------
 When the 1st tab for a module is shown another tab - called "Module Content" by default - will show as well. This tab is different from other tabs in two ways: 
 - It always contains all those topics that are not assigned to any other tab 
-- and it stays in its place as the first (leftmost) tab (but may be invisible!)
+- and it stays in its place as the first (leftmost) tab (but may be hidden or invisible!)
 
 Renaming and swapping tabs
 ------------------------
@@ -28,6 +28,14 @@ Hidden Tabs
 -----------
 If a tab only contains topics that are hidden from students the tab itself will be hidden from students as well while being marked accordingly for course admins.
 
+Single Topics Tabs
+------------------
+In the course settings for this format you may enable the option to treat single topics for a tab differently:
+
+When a section is the single section for a tab, the tab name will be replaced by the topic name. At the same time the header of the section is hidden to avoid showing the same name twice.
+<h4>Edit a Single Topic Tab name</h4>
+You cannot edit a topic name shown as a tab name directly. For this reason when in edit mode only the topic header is indeed shown again. You them may edit the topic name as usual. Any confirmed changes will then immediately be reflected in the tab name as well.
+
 Section 0
 ---------
 Other than other topics Section-0 may be shown always on top of the tabs and other topics. Options for moving section 0 to show always on top or in line with other topics may be chosen from the topic edit menu.
@@ -37,10 +45,10 @@ Technical
 Almost all of the tab-ability is done using jQuery while the orignal rendering of the page remains identical to the one used by the non-tabbed course format.
 (On slow client machines when loading a page you may see it being rendered normally before jQuery kicks in and hides page elements according to the current active tab.
 This means that all other functionality of a course page remains intact: topics may be moved, renamed and edited as usual.
-<h3>How does it work? </h3>
+<h4>How does it work? </h4>
 Tabs will have assigned the IDs of topics to them. When a tab is clicked ALL topics are first hidden and then all topics assigned to a tab will be shown.
 For the "Module Content" tab the behavior is complementary: first all topics are shown and the all those assignet to any of the other tabs will be hidden again.
 
-By default the format supports up to 5 tabs plus the "Module Content" tab (see below).
+By default the format supports up to 5 tabs plus the "Module Content" tab (see above).
 By setting $CFG->max_tabs in the config.php file this value may be changed up to a maximum of 10 tabs.
 
