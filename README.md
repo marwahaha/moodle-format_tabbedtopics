@@ -8,7 +8,9 @@ Assigining Topics to Tabs
 To assign a topic to a tab you need to be in edit mode. Then from the topic edit menu chose one of the options named "To Tab ...". The topic then will immediately been moved there.
 If this is the 1st topic assigned to a tab the tab will appear automatically (while removing the last topic from a tab will have it removed again). Clicking on it will show the assigned topic(s) and hide all others.
 
-Only tabs with assigned visible topics to them will be shown.<br>
+Initially tabs are named "Tab 1" to "Tab 5" but may be renamed (see below).
+
+Only tabs with assigned (visible) topics will be shown.<br>
 When tabs are shown and a page is loaded the left-most visible tab is always made the active one.
 
 The "Module Content" tab
@@ -31,8 +33,8 @@ If a tab only contains topics that are hidden from students the tab itself will 
 Single Topics Tabs
 ------------------
 In the course settings for this format you may enable the option to treat single topics for a tab differently:
-
-When a section is the single section for a tab, the tab name will be replaced by the topic name. At the same time the header of the section is hidden to avoid showing the same name twice.
+- When a topic is the single topic for a tab, the tab name will be replaced by the topic name.
+- At the same time the header of the section is hidden to avoid showing the same name twice.
 <h4>Edit a Single Topic Tab name</h4>
 You cannot edit a topic name shown as a tab name directly. For this reason only when in edit mode the topic header is indeed shown again. You them may edit the topic name as usual. Any confirmed changes will then immediately be reflected in the tab name as well.
 
