@@ -42,8 +42,8 @@ Other than other topics Section-0 may be shown always on top of the tabs and oth
 
 Technical
 ---------
-Almost all of the tab-ability is done using jQuery while the orignal rendering of the page remains identical to the one used by the non-tabbed course format.
-(On slow client machines when loading a page you may see it being rendered normally before jQuery kicks in and hides page elements according to the current active tab.
+Almost all of the tab-ability is done by hiding, showing and moving page elements using Javascript/jQuery while the orignal rendering of the page remains identical to the one used by the non-tabbed course format.
+
 This means that all other functionality of a course page remains intact: topics may be moved, renamed and edited as usual.
 <h4>How does it work? </h4>
 Tabs will have assigned the IDs of topics to them. When a tab is clicked ALL topics are first hidden and then all topics assigned to a tab will be shown.
