@@ -15,7 +15,7 @@ The "Module Content" tab
 ------------------------
 When the 1st tab for a module is shown another tab - called "Module Content" by default - will show as well. This tab is different from other tabs in two ways: 
 - It always contains all those topics that are not assigned to any other tab 
-- and it stays as the first tab (but may be invisible!)
+- and it stays in its place as the first (leftmost) tab (but may be invisible!)
 
 Renaming and swapping tabs
 ------------------------
