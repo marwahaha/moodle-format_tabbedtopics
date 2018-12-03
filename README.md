@@ -36,7 +36,7 @@ When a section is the single section for a tab, the tab name will be replaced by
 <h4>Edit a Single Topic Tab name</h4>
 You cannot edit a topic name shown as a tab name directly. For this reason only when in edit mode the topic header is indeed shown again. You them may edit the topic name as usual. Any confirmed changes will then immediately be reflected in the tab name as well.
 
-Section 0
+Section 0 always on top
 ---------
 Other than other topics Section-0 may be shown always on top of the tabs and other topics. Options for moving section 0 to show always on top or in line with other topics may be chosen from the topic edit menu.
 
