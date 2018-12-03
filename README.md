@@ -38,7 +38,7 @@ You cannot edit a topic name shown as a tab name directly. For this reason only 
 
 Section 0 always on top
 ---------
-Other than other topics Section-0 may be shown always on top of the tabs and other topics. Options for moving section 0 to show always on top or in line with other topics may be chosen from the topic edit menu.
+Being special Section-0 may be shown always on top of the tabs and other topics. Options for moving section 0 to show always on top or in line with other topics may be chosen from the topic edit menu.
 
 Technical
 ---------
