@@ -6,7 +6,7 @@ Initially the page rendering is identical to Topics - it is then only in edit mo
 Assigining Topics to Tabs
 -------------------------
 To assign a topic to a tab you need to be in edit mode. Then from the topic edit menu chose one of the options named "To Tab ...". The topic then will immediately been moved there.
-If this is the 1st topic assigned to a tab it will appear, removing the last topic from a tab will have it removed again. Clicking on it will show the assigned topic(s).
+If this is the 1st topic assigned to a tab it will appear, removing the last topic from a tab will have it removed again. Clicking on it will show the assigned topic(s) while hiding all others.
 
 Only tabs with assigned visible topics to them will be shown.<br>
 When tabs are shown and a page is loaded the left-most visible tab is always made the active one.
