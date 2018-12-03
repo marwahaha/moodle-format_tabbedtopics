@@ -3,6 +3,10 @@ This course format adds tab-abilties to the standard Moodle Topics format.
 
 Initially the page rendering is identical to Topics - it is then only in edit mode that you will discover some changes.
 
+By default the format supports up to 5 tabs plus the "Module Content" tab (see below).
+By setting $CFG->max_tabs in the config.php file this value may be changed up to a maximum of 10 tabs.
+Only tabs with assigned visible sections to them will be shown.
+
 Assigining Sections to Tabs
 ----
 To assign a section to a tab you need to be in edit mode. Then from the section edit menu chose one of the options named "To Tab ...". The section then will immediately been moved there.
@@ -19,6 +23,10 @@ Moving and renaming tabs
 ----
 Tabs may be renamed. To do so click on a tab name in edit mode, edit the name and press <ENTER> to save the changes or <ESC> to discard.
 Tabs may swap places. To do so in edit mode drag one tab onto the tab you want to swap it with. Remember: You cannot swap places with the "Module Content" tab - but you may rename it.
+  
+Hidden Tabs
+----
+If a tab only contains sections that are hidden from students the tab itself will be hidden from students as well while being marked accordingly for course admins.
 
 Section 0
 ----
