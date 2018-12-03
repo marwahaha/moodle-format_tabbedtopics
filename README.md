@@ -21,7 +21,7 @@ It always contains all those sections that are not assigned to any other tab - a
 
 Moving and renaming tabs
 ----
-Tabs may be renamed. To do so click on a tab name in edit mode, edit the name and press <ENTER> to save the changes or <ESC> to discard.
+Tabs may be renamed. To do so click on a tab name in edit mode, edit the name and press ENTER to save the changes or ESC to discard.
 Tabs may swap places. To do so in edit mode drag one tab onto the tab you want to swap it with. Remember: You cannot swap places with the "Module Content" tab - but you may rename it.
   
 Hidden Tabs
