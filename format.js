@@ -8,7 +8,7 @@ M.course.format = M.course.format || {};
  * Get sections config for this format
  *
  * The section structure is:
- * <ul class="tabtopics">
+ * <ul class="tabbedtopics">
  *  <li class="section">...</li>
  *  <li class="section">...</li>
  *   ...
@@ -19,7 +19,7 @@ M.course.format = M.course.format || {};
 M.course.format.get_config = function() {
     return {
         container_node : 'ul',
-        container_class : 'tabtopics',
+        container_class : 'tabbedtopics',
         section_node : 'li',
         section_class : 'section'
     };

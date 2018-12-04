@@ -16,27 +16,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'format_tabtopics', language 'en', branch 'MOODLE_20_STABLE'
+ * Strings for component 'format_tabbedtopics', language 'en', branch 'MOODLE_34_STABLE'
  *
- * @package   format_tabtopics
+ * @package   format_tabbedtopics
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['addsections'] = 'Add tabtopics';
+$string['addsections'] = 'Add Topics';
 $string['currentsection'] = 'This topic';
 $string['editsection'] = 'Edit topic';
 $string['editsectionname'] = 'Edit topic name';
 $string['deletesection'] = 'Delete topic';
 $string['newsectionname'] = 'New name for topic {$a}';
 $string['sectionname'] = 'Topic';
-$string['pluginname'] = 'TabTopics format';
+$string['pluginname'] = 'TabbedTopics format';
 $string['section0name'] = 'General';
-$string['page-course-view-tabtopics'] = 'Any course main page in tabtopics format';
-$string['page-course-view-tabtopics-x'] = 'Any course page in tabtopics format';
+$string['page-course-view-tabbedtopics'] = 'Any course main page in TabbedTopics format';
+$string['page-course-view-tabbedtopics-x'] = 'Any course page in TabbedTopics format';
 $string['hidefromothers'] = 'Hide topic';
 $string['showfromothers'] = 'Show topic';
-$string['privacy:metadata'] = 'The Topics format plugin does not store any personal data.';
+$string['privacy:metadata'] = 'The TabTopics format plugin does not store any personal data.';
 
 // tab related strings
 $string['modulecontent'] = 'Module Content';
@@ -44,17 +44,13 @@ $string['modulecontent'] = 'Module Content';
 $string['section0_label'] = 'Show Topic 0 above all tabs';
 $string['section0_help'] = 'When checked topic 0 is always shown above the tabs.';
 
-$string['single_section_tabs'] = 'Use section name as tab name for single sections';
-$string['single_section_tabs_label'] = 'Use section name as tab name for single sections';
-$string['single_section_tabs_help'] = 'When checked tabs with a single section will use the section name as tab name.';
-
-$string['assessment_info_tab'] = 'Show "Assessment Info" block under a tab';
-$string['assessment_info_tab_label'] = 'Show "Assessment Info" block under a tab if installed';
-$string['assessment_info_tab_help'] = 'When checked the "Assessment Info" block is shown under a tab if it is installed.';
+$string['single_section_tabs'] = 'Use topic name as tab name for single topics';
+$string['single_section_tabs_label'] = 'Use topic name as tab name for single topics';
+$string['single_section_tabs_help'] = 'When checked tabs with a single topic will use the topic name as tab name.';
 
 $string['tabname'] = 'Tab';
 $string['tabzero_title'] = 'Module Content';
 $string['tabtitle_edithint'] = 'Edit tab name';
 $string['tabtitle_editlabel'] = 'New value for {a}';
 
-$string['hidden_tab_hint'] = 'This tab contains only hidden sections and will not be shown to students';
+$string['hidden_tab_hint'] = 'This tab contains only hidden topics and will not be shown to students';

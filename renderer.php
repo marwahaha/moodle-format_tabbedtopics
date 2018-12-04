@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Renderer for outputting the tabtopics course format.
+ * Renderer for outputting the tabbedtopics course format.
  *
- * @package format_tabtopics
- * @copyright 2012 Dan Poltawski
+ * @package format_tabbedtopics
+ * @copyright 2012 Dan Poltawski / 2018 Matthias Opitz
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @since Moodle 2.3
  */
@@ -28,12 +28,13 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot.'/course/format/renderer.php');
 
 /**
- * Basic renderer for tabtopics format.
+ * Basic renderer for tabbedtopics format.
+ * with added tab-ability
  *
- * @copyright 2012 Dan Poltawski
+ * @copyright 2012 Dan Poltawski / 2018 Matthias Opitz
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class format_tabtopics_renderer extends format_section_renderer_base {
+class format_tabbedtopics_renderer extends format_section_renderer_base {
 
     /**
      * Constructor method, calls the parent constructor
@@ -44,7 +45,7 @@ class format_tabtopics_renderer extends format_section_renderer_base {
     public function __construct(moodle_page $page, $target) {
         parent::__construct($page, $target);
 
-        // Since format_tabtopics_renderer::section_edit_controls() only displays the 'Set current section' control when editing mode is on
+        // Since format_tabbedtopics_renderer::section_edit_controls() only displays the 'Set current section' control when editing mode is on
         // we need to be sure that the link 'Turn editing mode on' is available for a user who does not have any other managing capability.
         $page->set_other_editing_capability('moodle/course:setcurrentsection');
     }
@@ -55,7 +56,7 @@ class format_tabtopics_renderer extends format_section_renderer_base {
      */
     function start_section_list() {
         global $PAGE;
-        return html_writer::start_tag('ul', array('class' => 'tabtopics'));
+        return html_writer::start_tag('ul', array('class' => 'tabbedtopics'));
     }
 
     /**
@@ -74,7 +75,7 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
         $tabs = array();
 
-        $this->page->requires->js_call_amd('format_tabtopics/tabs', 'init', array());
+        $this->page->requires->js_call_amd('format_tabbedtopics/tabs', 'init', array());
 
         $modinfo = get_fast_modinfo($course);
         $course = course_get_format($course)->get_course();
@@ -103,9 +104,9 @@ class format_tabtopics_renderer extends format_section_renderer_base {
             $section0 = $sections[0];
 //            echo $this->start_section_list();
             if($format_options['single_section_tabs']) {
-                echo html_writer::start_tag('ul', array('class' => 'tabtopics single_section_tabs'));
+                echo html_writer::start_tag('ul', array('class' => 'tabbedtopics single_section_tabs'));
             } else {
-                echo html_writer::start_tag('ul', array('class' => 'tabtopics'));
+                echo html_writer::start_tag('ul', array('class' => 'tabbedtopics'));
             }
 
             // 0-section is displayed a little different then the others
@@ -150,9 +151,9 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         // the sections
 //        echo $this->start_section_list();
         if($format_options['single_section_tabs']) {
-            echo html_writer::start_tag('ul', array('class' => 'tabtopics single_section_tabs'));
+            echo html_writer::start_tag('ul', array('class' => 'tabbedtopics single_section_tabs'));
         } else {
-            echo html_writer::start_tag('ul', array('class' => 'tabtopics'));
+            echo html_writer::start_tag('ul', array('class' => 'tabbedtopics'));
         }
 
         foreach ($sections as $section => $thissection) {
@@ -313,9 +314,21 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         }
 
         // Insert tab moving menu items
+        $controls['no_tab'] = array(
+            "icon" => 't/left',
+            'name' => 'Remove from Tabs',
+
+            'attr' => array(
+                'tabnr' => 0,
+                'class' => 'tab_mover',
+                'title' => 'Remove from Tabs',
+                'data-action' => 'removefromtabs'
+            )
+        );
+
         $itemtitle = "Move to Tab ";
         $actions = array('movetotabzero', 'movetotabone', 'movetotabtwo','movetotabthree','movetotabfour','movetotabfive','movetotabsix','movetotabseven','movetotabeight','movetotabnine','movetotabten', 'sectionzeroontop', 'sectionzeroinline');
-        for($i = 0; $i <= $max_tabs; $i++) {
+        for($i = 1; $i <= $max_tabs; $i++) {
             $tabname = 'tab'.$i.'_title';
             $itemname = 'To Tab "'.($course->$tabname ? $course->$tabname : $i).'"';
 
@@ -331,18 +344,6 @@ class format_tabtopics_renderer extends format_section_renderer_base {
                 )
             );
         }
-
-        $controls['no_tab'] = array(
-            "icon" => 't/left',
-            'name' => 'Remove from Tabs',
-
-            'attr' => array(
-                'tabnr' => 0,
-                'class' => 'tab_mover',
-                'title' => 'Remove from Tabs',
-                'data-action' => 'removefromtabs'
-            )
-        );
 
         if ($section->section && has_capability('moodle/course:setcurrentsection', $coursecontext)) {
             if ($course->marker == $section->section) {  // Show the "light globe" on/off.
@@ -569,7 +570,7 @@ function render_tab($tab) {
         if(!$DB->record_exists('course_format_options', array('courseid' => $PAGE->course->id, 'name' => $tab->id.'_title'))) {
             $record = new stdClass();
             $record->courseid = $PAGE->course->id;
-            $record->format = 'tabtopics';
+            $record->format = 'tabbedtopics';
             $record->section = 0;
             $record->name = $tab->id.'_title';
             $record->value = 'Tab '.substr($tab->id,3);
@@ -588,9 +589,9 @@ function render_tab($tab) {
         echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink topictab nav-link " tab_title="'.$tab->title.'" style="'.($PAGE->user_is_editing() ? 'cursor: move;' : '').'">';
     }
     // render the tab name as inplace_editable
-    $tmpl = new \core\output\inplace_editable('format_tabtopics', 'tabname', $itemid,
+    $tmpl = new \core\output\inplace_editable('format_tabbedtopics', 'tabname', $itemid,
         $PAGE->user_is_editing(),
-        format_string($tab->title), $tab->title, get_string('tabtitle_edithint', 'format_tabtopics'),  get_string('tabtitle_editlabel', 'format_tabtopics', format_string($tab->title)));
+        format_string($tab->title), $tab->title, get_string('tabtitle_edithint', 'format_tabbedtopics'),  get_string('tabtitle_editlabel', 'format_tabbedtopics', format_string($tab->title)));
     echo $OUTPUT->render($tmpl);
     echo "</span>";
     echo html_writer::end_tag('li');
@@ -623,7 +624,7 @@ function check_section_ids($courseid, $sections, $section_ids, $section_nums, $t
             } else {
                 $new_tab_format_record = new \stdClass();
                 $new_tab_format_record->courseid = $courseid;
-                $new_tab_format_record->format = 'tabtopics';
+                $new_tab_format_record->format = 'tabbedtopics';
                 $new_tab_format_record->sectionid = 0;
                 $new_tab_format_record->name = 'tab'.$i.'_sectionnums';
                 $new_tab_format_record->value = $new_sectionnums;
