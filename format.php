@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Topics course format.  Display the whole course as "tabtopics" made of modules.
+ * Topics course format.  Display the whole course as "tabbedtopics" made of modules.
  *
- * @package format_tabtopics
+ * @package format_tabbedtopics
  * @copyright 2006 The Open University
  * @author N.D.Freear@open.ac.uk, and others.
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -49,7 +49,7 @@ if (($marker >=0) && has_capability('moodle/course:setcurrentsection', $context)
 // Make sure section 0 is created.
 course_create_sections_if_missing($course, 0);
 
-$renderer = $PAGE->get_renderer('format_tabtopics');
+$renderer = $PAGE->get_renderer('format_tabbedtopics');
 
 if (!empty($displaysection)) {
     $renderer->print_single_section_page($course, null, null, null, null, $displaysection);
@@ -58,4 +58,4 @@ if (!empty($displaysection)) {
 }
 
 // Include course format js module
-$PAGE->requires->js('/course/format/tabtopics/format.js');
+$PAGE->requires->js('/course/format/tabbedtopics/format.js');

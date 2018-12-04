@@ -18,13 +18,13 @@
  * Version details
  *
  * @package    format
- * @subpackage tabtopics
- * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
+ * @subpackage tabbedtopics
+ * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com) / Matthias Opitz (opitz@qmx.de)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2018051400;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2018120400;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires  = 2016112900;        // Requires this Moodle version.
-$plugin->component = 'format_tabtopics';    // Full name of the plugin (used for diagnostics).
+$plugin->component = 'format_tabbedtopics';    // Full name of the plugin (used for diagnostics).

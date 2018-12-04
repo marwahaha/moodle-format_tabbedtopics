@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains main class for the course format Topic
+ * This file contains main class for the course format TabbedTopic
  *
  * @since     Moodle 2.0
- * @package   format_tabtopics
- * @copyright 2009 Sam Hemelryk
+ * @package   format_tabbedtopics
+ * @copyright 2009 Sam Hemelryk / 2018 Matthias Opitz
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,13 +27,14 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot. '/course/format/lib.php');
 
 /**
- * Main class for the Topics course format
+ * Main class for the TabbedTopics course format
+ * with added tab-ability
  *
- * @package    format_tabtopics
- * @copyright  2012 Marina Glancy
+ * @package    format_tabbedtopics
+ * @copyright  2012 Marina Glancy / 2018 Matthias Opitz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class format_tabtopics extends format_base {
+class format_tabbedtopics extends format_base {
 
     /**
      * Returns true if this course format uses sections
@@ -63,7 +64,7 @@ class format_tabtopics extends format_base {
     }
 
     /**
-     * Returns the default section name for the tabtopics course format.
+     * Returns the default section name for the tabbedtopics course format.
      *
      * If the section number is 0, it will use the string with key = section0name from the course format's lang file.
      * If the section number is not 0, the base implementation of format_base::get_default_section_name which uses
@@ -75,7 +76,7 @@ class format_tabtopics extends format_base {
     public function get_default_section_name($section) {
         if ($section->section == 0) {
             // Return the general section.
-            return get_string('section0name', 'format_tabtopics');
+            return get_string('section0name', 'format_tabbedtopics');
         } else {
             // Use format_base::get_default_section_name implementation which
             // will display the section name in "Topic n" format.
@@ -215,7 +216,7 @@ class format_tabtopics extends format_base {
     /**
      * Definitions of the additional options that this course format uses for course
      *
-     * Topics format uses the following options:
+     * TabbedTopics format uses the following options:
      * - coursedisplay
      * - hiddensections
      *
@@ -239,11 +240,12 @@ class format_tabtopics extends format_base {
                 ),
                 'section0_ontop' => array(
                     'default' => false,
-                    'type' => PARAM_BOOL
+                    'type' => PARAM_BOOL,
+                    'label' => '',
                 ),
 
                 'single_section_tabs' => array(
-                    'default' => get_config('format_tabtopics', 'defaultsectionnameastabname'),
+                    'default' => get_config('format_tabbedtopics', 'defaultsectionnameastabname'),
                     'type' => PARAM_BOOL
                 ),
             );
@@ -252,7 +254,7 @@ class format_tabtopics extends format_base {
             $courseformatoptions['tab_seq'] = array('default' => '','type' => PARAM_TEXT,'label' => '','element_type' => 'hidden',);
 
             // now loop through the tabs but don't show them as we only need the DB records...
-            $courseformatoptions['tab0_title'] = array('default' => get_string('tabzero_title', 'format_tabtopics'),'type' => PARAM_TEXT,'label' => '','element_type' => 'hidden',);
+            $courseformatoptions['tab0_title'] = array('default' => get_string('tabzero_title', 'format_tabbedtopics'),'type' => PARAM_TEXT,'label' => '','element_type' => 'hidden',);
             $courseformatoptions['tab0'] = array('default' => "",'type' => PARAM_TEXT,'label' => '','element_type' => 'hidden',);
             for ($i = 1; $i <= $max_tabs; $i++) {
                 $courseformatoptions['tab'.$i.'_title'] = array('default' => "Tab ".$i,'type' => PARAM_TEXT,'label' => '','element_type' => 'hidden',);
@@ -288,16 +290,17 @@ class format_tabtopics extends format_base {
                     'help_component' => 'moodle',
                 ),
                 'section0_ontop' => array(
-                    'label' => get_string('section0_label', 'format_tabtopics'),
+                    'label' => get_string('section0_label', 'format_tabbedtopics'),
                     'element_type' => 'advcheckbox',
                     'help' => 'section0',
-                    'help_component' => 'format_tabtopics',
+                    'help_component' => 'format_tabbedtopics',
+                    'element_type' => 'hidden',
                 ),
                 'single_section_tabs' => array(
-                    'label' => get_string('single_section_tabs_label', 'format_tabtopics'),
+                    'label' => get_string('single_section_tabs_label', 'format_tabbedtopics'),
                     'element_type' => 'advcheckbox',
                     'help' => 'single_section_tabs',
-                    'help_component' => 'format_tabtopics',
+                    'help_component' => 'format_tabbedtopics',
                 ),
             );
             $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
@@ -339,7 +342,7 @@ class format_tabtopics extends format_base {
     /**
      * Updates format options for a course
      *
-     * In case if course format was changed to 'tabtopics', we try to copy options
+     * In case if course format was changed to 'tabbedtopics', we try to copy options
      * 'coursedisplay' and 'hiddensections' from the previous format.
      *
      * @param stdClass|array $data return value from {@link moodleform::get_data()} or array with data
@@ -388,11 +391,11 @@ class format_tabtopics extends format_base {
     public function inplace_editable_render_section_name($section, $linkifneeded = true,
                                                          $editable = null, $edithint = null, $editlabel = null) {
         if (empty($edithint)) {
-            $edithint = new lang_string('editsectionname', 'format_tabtopics');
+            $edithint = new lang_string('editsectionname', 'format_tabbedtopics');
         }
         if (empty($editlabel)) {
             $title = get_section_name($section->course, $section);
-            $editlabel = new lang_string('newsectionname', 'format_tabtopics', $title);
+            $editlabel = new lang_string('newsectionname', 'format_tabbedtopics', $title);
         }
         return parent::inplace_editable_render_section_name($section, $linkifneeded, $editable, $edithint, $editlabel);
     }
@@ -424,7 +427,7 @@ class format_tabtopics extends format_base {
 
         $tcsettings = $this->get_format_options();
         if ($section->section && ($action === 'setmarker' || $action === 'removemarker')) {
-            // Format 'tabtopics' allows to set and remove markers in addition to common section actions.
+            // Format 'tabbedtopics' allows to set and remove markers in addition to common section actions.
             require_capability('moodle/course:setcurrentsection', context_course::instance($this->courseid));
             course_set_marker($this->courseid, ($action === 'setmarker') ? $section->section : 0);
             return null;
@@ -477,7 +480,7 @@ class format_tabtopics extends format_base {
 
         // For show/hide actions call the parent method and return the new content for .section_availability element.
         $rv = parent::section_action($section, $action, $sr);
-        $renderer = $PAGE->get_renderer('format_tabtopics');
+        $renderer = $PAGE->get_renderer('format_tabbedtopics');
         $rv['section_availability'] = $renderer->section_availability($this->get_section($section));
         return $rv;
     }
@@ -631,13 +634,13 @@ class format_tabtopics extends format_base {
  * @param mixed $newvalue
  * @return \core\output\inplace_editable
  */
-function format_tabtopics_inplace_editable($itemtype, $itemid, $newvalue) {
+function format_tabbedtopics_inplace_editable($itemtype, $itemid, $newvalue) {
     global $DB, $CFG;
     require_once($CFG->dirroot . '/course/lib.php');
     if ($itemtype === 'sectionname' || $itemtype === 'sectionnamenl') {
         $section = $DB->get_record_sql(
             'SELECT s.* FROM {course_sections} s JOIN {course} c ON s.course = c.id WHERE s.id = ? AND c.format = ?',
-            array($itemid, 'tabtopics'), MUST_EXIST);
+            array($itemid, 'tabbedtopics'), MUST_EXIST);
         return course_get_format($section->course)->inplace_editable_update_section_name($section, $itemtype, $newvalue);
     }
     // deal with inplace changes of a tab name
@@ -658,7 +661,7 @@ function format_tabtopics_inplace_editable($itemtype, $itemid, $newvalue) {
         $DB->update_record('course_format_options', array('id' => $record->id, 'value' => $newvalue));
 
         // Prepare the element for the output ():
-        $output = new \core\output\inplace_editable('format_tabtopics', 'tabname', $record->id,
+        $output = new \core\output\inplace_editable('format_tabbedtopics', 'tabname', $record->id,
             true,
             format_string($newvalue), $newvalue, 'Edit tab name',  'New value for ' . format_string($newvalue));
 

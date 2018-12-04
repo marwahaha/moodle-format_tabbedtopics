@@ -22,7 +22,7 @@ function update_tab_seq($sectionid, $tab_seq) {
     } else {
         $tab_seq_record = new \stdClass();
         $tab_seq_record->courseid = $section->course;
-        $tab_seq_record->format = 'tabtopics';
+        $tab_seq_record->format = 'tabbedtopics';
         $tab_seq_record->sectionid = 0;
         $tab_seq_record->name = 'tab_seq';
         $tab_seq_record->value = $tab_seq;

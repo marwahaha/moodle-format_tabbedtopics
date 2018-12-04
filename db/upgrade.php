@@ -17,7 +17,7 @@
 /**
  * Upgrade scripts for course format "Topics"
  *
- * @package    format_tabtopics
+ * @package    format_tabbedtopics
  * @copyright  2017 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,22 +25,22 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Upgrade script for format_tabtopics
+ * Upgrade script for format_tabbedtopics
  *
  * @param int $oldversion the version we are upgrading from
  * @return bool result
  */
-function xmldb_format_tabtopics_upgrade($oldversion) {
+function xmldb_format_tabbedtopics_upgrade($oldversion) {
     global $CFG, $DB;
 
-    require_once($CFG->dirroot . '/course/format/tabtopics/db/upgradelib.php');
+    require_once($CFG->dirroot . '/course/format/tabbedtopics/db/upgradelib.php');
 
     if ($oldversion < 2017020200) {
 
         // Remove 'numsections' option and hide or delete orphaned sections.
-        format_tabtopics_upgrade_remove_numsections();
+        format_tabbedtopics_upgrade_remove_numsections();
 
-        upgrade_plugin_savepoint(true, 2017020200, 'format', 'tabtopics');
+        upgrade_plugin_savepoint(true, 2017020200, 'format', 'tabbedtopics');
     }
 
     // Automatically generated Moodle v3.3.0 release upgrade line.
@@ -54,9 +54,9 @@ function xmldb_format_tabtopics_upgrade($oldversion) {
         // During upgrade to Moodle 3.3 it could happen that general section (section 0) became 'invisible'.
         // It should always be visible.
         $DB->execute("UPDATE {course_sections} SET visible=1 WHERE visible=0 AND section=0 AND course IN
-        (SELECT id FROM {course} WHERE format=?)", ['tabtopics']);
+        (SELECT id FROM {course} WHERE format=?)", ['tabbedtopics']);
 
-        upgrade_plugin_savepoint(true, 2018030900, 'format', 'tabtopics');
+        upgrade_plugin_savepoint(true, 2018030900, 'format', 'tabbedtopics');
     }
 
     // Automatically generated Moodle v3.5.0 release upgrade line.
