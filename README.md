@@ -1,11 +1,11 @@
 # moodle-format_tabbedtopics
 This course format adds tab-abilties to the standard Moodle Topics format.
 
-Initially the page rendering is identical to Topics - it is then only in edit mode that you will discover some changes.
+Initially the page rendering is identical to the standard Topics course format - it is then only in edit mode that you will discover some changes.
 
 Assigining Topics to Tabs
 -------------------------
-To assign a topic to a tab you need to be in edit mode. Then from the topic edit menu chose one of the options named "To Tab ...". The topic then will immediately been moved there.
+To assign a topic to a tab you need to be in edit mode. Then from the topic edit menu chose one of the options named "To Tab ...". The topic then will immediately move there.
 If this is the 1st topic assigned to a tab the tab will appear automatically (while removing the last topic from a tab will have it removed again). Clicking on it will show the assigned topic(s) and hide all others.
 
 Initially tabs are named "Tab 1" to "Tab 5" but may be renamed (see below).
@@ -34,11 +34,11 @@ Single Topics Tabs
 ------------------
 In the course settings for this format you may enable the option to treat single topics for a tab differently:
 - When a topic is the single topic for a tab, the tab name will be replaced by the topic name.
-- At the same time the header of the section is hidden to avoid showing the same name twice.
+- At the same time the standard header of the topic is - normally - hidden to avoid showing the same name twice.
 
 <b>Please note</b> that when this option is set the first topic assigned to a tab will swap the tab name for the topic name - while assigning a second topic to the same tab will immediately change it back to the original tab name.
 <h4>Edit a Single Topic Tab name</h4>
-You cannot edit a topic name shown as a tab name directly. For this reason only when in edit mode the topic header is indeed shown again. You them may edit the topic name as usual. Any confirmed changes will then immediately be reflected in the tab name as well.
+You cannot edit a topic name shown as a tab name directly. For this reason only when in edit mode the topic header is indeed shown again - but slightly dimmed. You them may edit the topic name as usual. Any confirmed changes will then immediately be reflected in the tab name as well.
 
 Section 0 always on top
 ---------
