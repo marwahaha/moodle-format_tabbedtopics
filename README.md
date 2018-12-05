@@ -51,7 +51,7 @@ Almost all of the tab-ability is done by hiding, showing and moving page element
 This means that all other functionality of a course page remains intact: topics may be moved, renamed and edited as usual.
 <h4>How does it work? </h4>
 Tabs will have assigned the IDs of topics to them. When a tab is clicked ALL topics are first hidden and then all topics assigned to a tab will be shown.
-For the "Module Content" tab the behavior is complementary: first all topics are shown and the all those assigned to any of the other tabs will be hidden again.
+For the "Module Content" tab the behavior is complementary: first all topics are shown and then all those assigned to any of the other tabs will be hidden again.
 
 By default the format supports up to 5 tabs plus the "Module Content" tab (see above).
 By setting $CFG->max_tabs in the config.php file this value may be changed up to a maximum of 10 tabs.
