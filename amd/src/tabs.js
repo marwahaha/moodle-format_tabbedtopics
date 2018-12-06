@@ -118,7 +118,12 @@ define(['jquery', 'jqueryui'], function($) {
                         var getTheString = str.get_string('hidden_tab_hint', 'format_tabbedtopics');
                         $.when(getTheString).done(function(theString) {
                             self.find('#not-shown-hint-' + tabid).remove();
-                            self.append('<i id="not-shown-hint-' + tabid+'" class="fa fa-info" title="'+theString+'"></i>');
+                            var theAppendix = '<i id="not-shown-hint-'+tabid+'" class="fa fa-info" title="'+theString+'"></i>';
+                            if ($('.tablink .fa-pencil').length > 0) { // When in edit mode ...
+                                self.find('.inplaceeditable').append(theAppendix);
+                            } else {
+                                self.append(theAppendix);
+                            }
                         });
                     });
                 } else {
