@@ -32,11 +32,6 @@
     white-space: nowrap;
 }
 
-.tablinkxx {
-    background-color: #fcfcfc;
-    border-style: solid !important;
-}
-
 .tablink {
     margin-right: 5px;
     padding-top: 5px;
@@ -69,4 +64,8 @@ li.section.ontop {
 
 .edit_only {
     opacity: 0.4;
+}
+
+.tabs {
+    padding-left: 30px;
 }
