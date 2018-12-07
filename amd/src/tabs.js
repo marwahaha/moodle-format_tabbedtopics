@@ -111,7 +111,7 @@ define(['jquery', 'jqueryui'], function($) {
                 // If all visible sections are hidden for students the tab is hidden for them as well
                 // in this case mark the tab for admins so they are aware
                 if (visibleSections <= hiddenSections) {
-                    $(this).addClass('tab-not-shown');
+                    $(this).addClass('hidden-tab');
                     // X console.log("==> marking hidden tab "+tabid);
                     var self = $(this);
                     require(['core/str'], function(str) {
@@ -127,7 +127,7 @@ define(['jquery', 'jqueryui'], function($) {
                         });
                     });
                 } else {
-                    $(this).removeClass('tab-not-shown');
+                    $(this).removeClass('hidden-tab');
                     $('#not-shown-hint-'+tabid).remove();
                 }
 
@@ -279,6 +279,11 @@ define(['jquery', 'jqueryui'], function($) {
                         tabname = $(this).find('.inplaceeditable').attr('data-value');
                     }
                     if ($.inArray(trackname, tracknames) < 0) {
+                        if ($(this).hasClass('hidden-tab')) { // If this is a hidden tab remove all garnish from the name
+                            tabname = $(this).find('a').clone();
+                            tabname.find('span.quickediticon').remove();
+                            tabname = $.trim(tabname.html());
+                        }
                         tabArray[tabid] = tabname;
                         tracknames.push(trackname);
                     }
