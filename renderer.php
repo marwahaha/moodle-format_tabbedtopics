@@ -56,7 +56,7 @@ class format_tabbedtopics_renderer extends format_section_renderer_base {
      */
     function start_section_list() {
         global $PAGE;
-        return html_writer::start_tag('ul', array('class' => 'tabbedtopics'));
+        return html_writer::start_tag('ul', array('class' => 'topics'));
     }
 
     /**
@@ -104,9 +104,9 @@ class format_tabbedtopics_renderer extends format_section_renderer_base {
             $section0 = $sections[0];
 //            echo $this->start_section_list();
             if($format_options['single_section_tabs']) {
-                echo html_writer::start_tag('ul', array('class' => 'tabbedtopics single_section_tabs'));
+                echo html_writer::start_tag('ul', array('class' => 'topics single_section_tabs'));
             } else {
-                echo html_writer::start_tag('ul', array('class' => 'tabbedtopics'));
+                echo html_writer::start_tag('ul', array('class' => 'topics'));
             }
 
             // 0-section is displayed a little different then the others
@@ -151,9 +151,9 @@ class format_tabbedtopics_renderer extends format_section_renderer_base {
         // the sections
 //        echo $this->start_section_list();
         if($format_options['single_section_tabs']) {
-            echo html_writer::start_tag('ul', array('class' => 'tabbedtopics single_section_tabs'));
+            echo html_writer::start_tag('ul', array('class' => 'topics single_section_tabs'));
         } else {
-            echo html_writer::start_tag('ul', array('class' => 'tabbedtopics'));
+            echo html_writer::start_tag('ul', array('class' => 'topics'));
         }
 
         foreach ($sections as $section => $thissection) {
