@@ -19,24 +19,11 @@
  * Strings for component 'format_tabbedtopics', language 'en', branch 'MOODLE_34_STABLE'
  *
  * @package   format_tabbedtopics
- * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @copyright 2018 onwards Matthias Opitz  (opitz@qmx.de)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['addsections'] = 'Add Topics';
-$string['currentsection'] = 'This topic';
-$string['editsection'] = 'Edit topic';
-$string['editsectionname'] = 'Edit topic name';
-$string['deletesection'] = 'Delete topic';
-$string['newsectionname'] = 'New name for topic {$a}';
-$string['sectionname'] = 'Topic';
 $string['pluginname'] = 'TabbedTopics format';
-$string['section0name'] = 'General';
-$string['page-course-view-tabbedtopics'] = 'Any course main page in TabbedTopics format';
-$string['page-course-view-tabbedtopics-x'] = 'Any course page in TabbedTopics format';
-$string['hidefromothers'] = 'Hide topic';
-$string['showfromothers'] = 'Show topic';
-$string['privacy:metadata'] = 'The TabTopics format plugin does not store any personal data.';
 
 // tab related strings
 $string['modulecontent'] = 'Module Content';

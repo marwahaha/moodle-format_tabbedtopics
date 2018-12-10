@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: opitz
+ * User: Matthias Opitz
  * Date: 04/10/18
  * Time: 14:46
  *

@@ -1,7 +1,7 @@
 # moodle-format_tabbedtopics
-This course format adds tab-abilties to the standard Moodle Topics format.
+This course format is based on the standard Moodle Topics format but adds tab-abilties to it!
 
-Initially the page rendering is identical to the standard Topics course format - it is then only in edit mode that you will discover some changes.
+So initially the page rendering is identical to the standard Topics course format - it is then only in edit mode that you will discover some changes.
 
 Assigining Topics to Tabs
 -------------------------
@@ -37,7 +37,7 @@ In the course settings for this format you may enable the option to treat single
 - At the same time the standard header of the topic is - normally - hidden to avoid showing the same name twice.
 
 <b>Please note</b> that when this option is set the first topic assigned to a tab will swap the tab name for the topic name - while assigning a second topic to the same tab will immediately change it back to the original tab name.
-<h4>Edit a Single Topic Tab name</h4>
+####Edit a Single Topic Tab name
 You cannot edit a topic name shown as a tab name directly. For this reason only when in edit mode the topic header is indeed shown again - but slightly dimmed. You them may edit the topic name as usual. Any confirmed changes will then immediately be reflected in the tab name as well.
 
 Section 0 always on top
@@ -49,10 +49,12 @@ Technical
 Almost all of the tab-ability is done by hiding, showing and moving page elements using Javascript/jQuery while the orignal rendering of the page remains identical to the one used by the non-tabbed course format.
 
 This means that all other functionality of a course page remains intact: topics may be moved, renamed and edited as usual.
-<h4>How does it work? </h4>
+#####How does it work?
 Tabs will have assigned the IDs of topics to them. When a tab is clicked ALL topics are first hidden and then all topics assigned to a tab will be shown.
 For the "Module Content" tab the behavior is complementary: first all topics are shown and then all those assigned to any of the other tabs will be hidden again.
 
 By default the format supports up to 5 tabs plus the "Module Content" tab (see above).
 By setting $CFG->max_tabs in the config.php file this value may be changed up to a maximum of 10 tabs.
 
+----
+Version: topics-based v.20181210
