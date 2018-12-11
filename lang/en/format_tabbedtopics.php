@@ -25,6 +25,27 @@
 
 $string['pluginname'] = 'TabbedTopics format';
 
+$string['alttext'] = 'Alt text';
+$string['currentimage'] = 'Current image';
+$string['deleteimage'] = 'Delete image';
+$string['displaynews'] = 'I want to display news and announcements from my module forum';
+$string['editnewssettings'] = 'Edit news display settings';
+$string['imagefile'] = 'News or General Image file';
+$string['morenews'] = 'More news & announcements';
+$string['newssettingsof'] = 'News Settings of {$a}';
+$string['readfullpost'] = 'Read full post';
+$string['shownewsfull'] = 'I want to display a shortened version of news and announcements';
+$string['statictext'] = 'I want to display some static text';
+$string['usestatictext'] = 'Use static text instead of Module Announcements';
+$string['currentsection'] = 'This topic';
+$string['editsection'] = 'Edit topic';
+$string['deletesection'] = 'Delete topic';
+$string['sectionname'] = 'Topic';
+$string['section0name'] = 'General';
+$string['hidefromothers'] = 'Hide topic';
+$string['showfromothers'] = 'Show topic';
+$string['addsections'] = 'Add Topics';
+
 // tab related strings
 $string['modulecontent'] = 'Module Content';
 
