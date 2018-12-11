@@ -390,7 +390,6 @@ define(['jquery', 'jqueryui'], function($) {
                                 foundIt = true;
                                 return false;
                             }
-                            return false;
                         });
                         if (!foundIt) {
                             $('#tab0').click();
