@@ -511,7 +511,7 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
                 $record->format = 'tabbedtopics';
                 $record->section = 0;
                 $record->name = $tab->id.'_title';
-                $record->value = 'Tab '.substr($tab->id,3);
+                $record->value = ($tab->id == 'tab0' ? get_string('tabzero_title', 'format_tabbedtopics') :'Tab '.substr($tab->id,3));
                 $DB->insert_record('course_format_options', $record);
             }
 

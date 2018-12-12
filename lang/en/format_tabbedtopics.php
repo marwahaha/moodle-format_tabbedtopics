@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'TabbedTopics format';
+$string['pluginname'] = 'Tabbed Topics format';
 
 $string['alttext'] = 'Alt text';
 $string['currentimage'] = 'Current image';
@@ -37,6 +37,7 @@ $string['readfullpost'] = 'Read full post';
 $string['shownewsfull'] = 'I want to display a shortened version of news and announcements';
 $string['statictext'] = 'I want to display some static text';
 $string['usestatictext'] = 'Use static text instead of Module Announcements';
+
 $string['currentsection'] = 'This topic';
 $string['editsection'] = 'Edit topic';
 $string['deletesection'] = 'Delete topic';
