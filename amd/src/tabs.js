@@ -236,12 +236,12 @@ define(['jquery', 'jqueryui'], function($) {
                 // X console.log('---> countableSections = '+countableSections);
                 if (countableSections > 0 && $('li.section:visible').length >= countableSections) {
                     // X console.log('staying with the current tab (id = '+activeTabId+
-                    //    ') as there are still '+$('li.section:visible').length+' sections left');
+                    // X   ') as there are still '+$('li.section:visible').length+' sections left');
                     $("#tab"+tabnum).click();
                     $('#'+activeTabId).click();
                 } else {
                     // X console.log('no section in active tab id '+
-                    //    activeTabId+' left - hiding it and following section to new tab nr '+tabnum);
+                    // X   activeTabId+' left - hiding it and following section to new tab nr '+tabnum);
                     $("#tab"+tabnum).click();
                     $('#'+activeTabId).parent().hide();
                 }
