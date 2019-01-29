@@ -5,7 +5,7 @@ define(['jquery', 'jqueryui'], function($) {
 // ---------------------------------------------------------------------------------------------------------------------
             // When a single section is shown under a tab use the section name as tab name
             var changeTab = function(tab, target) {
-                // X console.log('single section in tab: using section name as tab name');
+                 console.log('single section in tab: using section name as tab name');
 
                 // Replace the tab name with the section name
                 var origSectionname = target.find('.sectionname:not(.hidden)');
@@ -48,7 +48,7 @@ define(['jquery', 'jqueryui'], function($) {
                 $('.hidden.sectionname').show();
                 $('.section-handle').show();
 
-                // X console.log('--> restoring section headline ');
+                 console.log('--> restoring section headline ');
             };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ define(['jquery', 'jqueryui'], function($) {
                 var sections = $(this).attr('sections');
                 var sectionArray = sections.split(",");
 
-                // X console.log('----');
+                 console.log('----');
 
                 // Make this an active tab
                 $(".active").removeClass("active"); // First remove any active class
@@ -71,7 +71,7 @@ define(['jquery', 'jqueryui'], function($) {
                 if (typeof clickedTabName == 'undefined') {
                     clickedTabName = $(this).html();
                 }
-                // X console.log('Clicked tab "'+clickedTabName+'":');
+                 console.log('Clicked tab "'+clickedTabName+'":');
 
                 if (tabid === 'tab0') { // Show all sections - then hide each section shown in other tabs
                     $("#changenumsections").show();
@@ -82,7 +82,7 @@ define(['jquery', 'jqueryui'], function($) {
                             $.each($(this).attr('sections').split(","), function(index, value) {
                                 var target = $(".section[section-id='"+value+"']");
                                 target.hide();
-                                // X console.log("--> hiding section " + value);
+                                 console.log("--> hiding section " + value);
                             });
                         }
                     });
@@ -92,7 +92,7 @@ define(['jquery', 'jqueryui'], function($) {
                     $.each(sectionArray, function(index, value) {
                         var target = $(".section[section-id='" + value + "']");
                         target.show();
-                        // X console.log("--> showing section " + value);
+                         console.log("--> showing section " + value);
                     });
                 }
 
@@ -102,17 +102,17 @@ define(['jquery', 'jqueryui'], function($) {
                 var visibleSections=$('li.section:visible').length;
                 var hiddenSections=$('li.section.hidden:visible').length;
                 if ($('.section0_ontop').length > 0) {
-                    // X console.log('section0 is on top - so reducing the number of visible sections for this tab by 1');
+                     console.log('section0 is on top - so reducing the number of visible sections for this tab by 1');
                     visibleSections--;
                 }
-                // X console.log('number of visible sections: '+visibleSections);
-                // X console.log('number of hidden sections: '+hiddenSections);
+                 console.log('number of visible sections: '+visibleSections);
+                 console.log('number of hidden sections: '+hiddenSections);
 
                 // If all visible sections are hidden for students the tab is hidden for them as well
                 // in this case mark the tab for admins so they are aware
                 if (visibleSections <= hiddenSections) {
                     $(this).addClass('hidden-tab');
-                    // X console.log("==> marking hidden tab "+tabid);
+                     console.log("==> marking hidden tab "+tabid);
                     var self = $(this);
                     require(['core/str'], function(str) {
                         var getTheString = str.get_string('hidden_tab_hint', 'format_tabbedtopics');
@@ -132,7 +132,7 @@ define(['jquery', 'jqueryui'], function($) {
                 }
 
                 if (visibleSections < 1) {
-                    // X console.log('tab with no visible sections - hiding it');
+                     console.log('tab with no visible sections - hiding it');
                     $(this).parent().hide();
 
                     // restoring generic tab name
@@ -153,7 +153,7 @@ define(['jquery', 'jqueryui'], function($) {
                         }
                     });
                 } else {
-                    // X console.log('tab with visible sections - showing it');
+                     console.log('tab with visible sections - showing it');
                     $(this).parent().show();
                 }
 
@@ -421,6 +421,7 @@ define(['jquery', 'jqueryui'], function($) {
             $(document).ready(function() {
                 initFunctions();
 
+                console.log('=================< tabbedtopics/tabs.js >=================');
                 // Show the edit menu for section-0
                 $("#section-0 .right.side").show();
 
