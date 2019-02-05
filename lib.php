@@ -38,11 +38,17 @@ class format_tabbedtopics extends format_topics {
 
     public function course_format_options($foreditform = false) {
         global $CFG;
-        $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
+//        $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
+        $max_tabs = 9; // Currently there is a maximum of 9 tabs!
         static $courseformatoptions = false;
         if ($courseformatoptions === false) {
             $courseconfig = get_config('moodlecourse');
             $courseformatoptions = array(
+                'maxtabs' => array(
+                    'default' => (isset($CFG->max_tabs) ? $CFG->max_tabs : 5),
+                    'type' => PARAM_INT,
+                    'element_type' => 'hidden',
+                ),
                 'hiddensections' => array(
                     'default' => $courseconfig->hiddensections,
                     'type' => PARAM_INT,

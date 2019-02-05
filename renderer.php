@@ -49,10 +49,6 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
     public function print_multiple_section_page($course, $sections, $mods, $modnames, $modnamesused) {
         global $CFG, $DB, $PAGE;
 
-        // allow up to 5 user tabs if nothing else is set in the config file
-        $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
-        $tabs = array();
-
         $this->page->requires->js_call_amd('format_tabbedtopics/tabs', 'init', array());
 
         $modinfo = get_fast_modinfo($course);
@@ -117,8 +113,8 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
             $tab_seq = explode(',',$format_options['tab_seq']);
         }
 
-        // if a tab sequence is found use it to arrange the tabs otherwise show them in default order
-        if(sizeof($tab_seq) > 0) {
+        // if a tab sequence equal to the number of tabs is found use it to arrange the tabs otherwise show them in default order
+        if(sizeof($tab_seq) == sizeof($tabs)) {
             foreach ($tab_seq as $tabid) {
                 $tab = $tabs[$tabid];
                 $this->render_tab($tab);
@@ -212,13 +208,23 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
      * @return array of edit control items
      */
     protected function section_edit_control_items($course, $section, $onsectionpage = false) {
-        global $CFG, $PAGE;
+        global $DB, $CFG, $PAGE;
 
         if (!$PAGE->user_is_editing()) {
             return array();
         }
+        $options = $DB->get_records('course_format_options', array('courseid' => $course->id));
+        $format_options=array();
+        foreach($options as $option) {
+            $format_options[$option->name] =$option->value;
+        }
 
-        $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
+        if(isset($format_options['maxtabs'])){
+            $max_tabs = $format_options['maxtabs'];
+        } else {
+            // allow up to 5 tabs  by default if nothing else is set in the config file
+            $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
+        }
         $max_tabs = ($max_tabs < 10 ? $max_tabs : 9 ); // Restrict tabs to 10 max (0...9)
         $coursecontext = context_course::instance($course->id);
 
@@ -460,8 +466,8 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
     public function prepare_tabs($course, $format_options, $sections) {
         global $CFG, $DB, $PAGE;
 
-        // allow up to 5 user tabs if nothing else is set in the config file
-        $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
+        // prepare a maximum of 10 user tabs (0..9)
+        $max_tabs = 9;
         $tabs = array();
 
         // preparing the tabs
