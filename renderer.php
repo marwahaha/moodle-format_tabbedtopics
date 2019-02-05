@@ -113,7 +113,7 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
             $tab_seq = explode(',',$format_options['tab_seq']);
         }
 
-        // if a tab sequence equal to the number of tabs is found use it to arrange the tabs otherwise show them in default order
+        // if a tab sequence is equal to the number of tabs is found use it to arrange the tabs otherwise show them in default order
         if(sizeof($tab_seq) == sizeof($tabs)) {
             foreach ($tab_seq as $tabid) {
                 $tab = $tabs[$tabid];

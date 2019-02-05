@@ -214,7 +214,8 @@ class format_tabbedtopics extends format_topics {
         global $CFG;
         global $DB;
 
-        $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
+//        $max_tabs = (isset($CFG->max_tabs) ? $CFG->max_tabs : 5);
+        $max_tabs = 9;
 
         for($i = 0; $i <= $max_tabs; $i++) {
             if(strstr($settings['tab'.$i], $section2remove->id) > -1) {
