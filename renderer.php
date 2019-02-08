@@ -473,11 +473,13 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         // preparing the tabs
         $count_tabs = 0;
         for ($i = 0; $i <= $max_tabs; $i++) {
-            $tab_sections = str_replace(' ', '', $format_options['tab' . $i]);
-            $tab_section_nums = str_replace(' ', '', $format_options['tab' . $i. '_sectionnums']);
+            $tab_sections = '';
+            $tab_section_nums = '';
 
             // check section IDs and section numbers for tabs other than tab0
             if($i > 0) {
+                $tab_sections = str_replace(' ', '', $format_options['tab' . $i]);
+                $tab_section_nums = str_replace(' ', '', $format_options['tab' . $i. '_sectionnums']);
                 $section_ids = explode(',', $tab_sections);
                 $section_nums = explode(',', $tab_section_nums);
                 $tab_sections = $this->check_section_ids($course->id, $sections, $section_ids, $section_nums, $tab_sections, $tab_section_nums,$i);
@@ -487,6 +489,7 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
             $tab->id = "tab" . $i;
             $tab->name = "tab" . $i;
             $tab->title = $format_options['tab' . $i . '_title'];
+            $tab->generic_title = 'Tab '.$i;
             $tab->sections = $tab_sections;
             $tab->section_nums = $tab_section_nums;
             $tabs[$tab->id] = $tab;
@@ -532,9 +535,23 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         }
 
         if ($tab->id == 'tab0') {
-            echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink nav-link " tab_title="'.$tab->title.'">';
+            echo '<span 
+                data-toggle="tab" id="'.$tab->id.'" 
+                sections="'.$tab->sections.'" 
+                section_nums="'.$tab->section_nums.'" 
+                class="tablink nav-link " 
+                tab_title="'.$tab->title.'", 
+                generic_title = "'.$tab->generic_title.'"
+                >';
         } else {
-            echo '<span data-toggle="tab" id="'.$tab->id.'" sections="'.$tab->sections.'" section_nums="'.$tab->section_nums.'" class="tablink topictab nav-link " tab_title="'.$tab->title.'" style="'.($PAGE->user_is_editing() ? 'cursor: move;' : '').'">';
+            echo '<span 
+                data-toggle="tab" id="'.$tab->id.'" 
+                sections="'.$tab->sections.'" 
+                section_nums="'.$tab->section_nums.'" 
+                class="tablink topictab nav-link " 
+                tab_title="'.$tab->title.'" 
+                generic_title = "'.$tab->generic_title.'" 
+                style="'.($PAGE->user_is_editing() ? 'cursor: move;' : '').'">';
         }
         // render the tab name as inplace_editable
         $tmpl = new \core\output\inplace_editable('format_tabbedtopics', 'tabname', $itemid,
@@ -545,21 +562,27 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         echo html_writer::end_tag('li');
     }
 
+    // Check section IDs and repair them if they have changed - most probably because a course was imported
     public function check_section_ids($courseid, $sections, $section_ids, $section_nums, $tab_sections, $tab_section_nums, $i) {
         global $DB;
         // check section IDs are valid for this course - and repair them using section numbers if they are not
         $tab_format_record = $DB->get_record('course_format_options', array('courseid' => $courseid, 'name' => 'tab'.$i));
         $ids_have_changed = false;
         $new_section_nums = array();
+
         foreach($section_ids as $index => $section_id) {
-            $section = $sections[$section_id];
-            $new_section_nums[] = $section->section;
-            if($section_id && !($section)) {
-                $section = $DB->get_record('course_sections', array('course' => $courseid, 'section' => $section_nums[$index]));
-                $tab_sections = str_replace($section_id, $section->id, $tab_sections);
-                $ids_have_changed = true;
+            if(isset($sections[$section_id])) {
+                if($section = $sections[$section_id]) {
+                    $new_section_nums[] = $section->section;
+                }
+                if($section_id && !($section)) {
+                    $section = $DB->get_record('course_sections', array('course' => $courseid, 'section' => $section_nums[$index]));
+                    $tab_sections = str_replace($section_id, $section->id, $tab_sections);
+                    $ids_have_changed = true;
+                }
             }
         }
+
         if($ids_have_changed) {
             $DB->update_record('course_format_options', array('id' => $tab_format_record->id, 'value' => $tab_sections));
         }

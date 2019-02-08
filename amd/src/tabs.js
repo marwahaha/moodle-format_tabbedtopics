@@ -58,7 +58,7 @@ define(['jquery', 'jqueryui'], function($) {
                 var sections = $(this).attr('sections');
                 var sectionArray = sections.split(",");
 
-                 console.log('----');
+                console.log('----');
 
                 // Make this an active tab
                 $(".active").removeClass("active"); // First remove any active class
@@ -92,7 +92,7 @@ define(['jquery', 'jqueryui'], function($) {
                     $.each(sectionArray, function(index, value) {
                         var target = $(".section[section-id='" + value + "']");
                         target.show();
-                         console.log("--> showing section " + value);
+                        console.log("--> showing section " + value);
                     });
                 }
 
@@ -102,17 +102,17 @@ define(['jquery', 'jqueryui'], function($) {
                 var visibleSections=$('li.section:visible').length;
                 var hiddenSections=$('li.section.hidden:visible').length;
                 if ($('.section0_ontop').length > 0) {
-                     console.log('section0 is on top - so reducing the number of visible sections for this tab by 1');
+                   console.log('section0 is on top - so reducing the number of visible sections for this tab by 1');
                     visibleSections--;
                 }
-                 console.log('number of visible sections: '+visibleSections);
-                 console.log('number of hidden sections: '+hiddenSections);
+                console.log('number of visible sections: '+visibleSections);
+                console.log('number of hidden sections: '+hiddenSections);
 
                 // If all visible sections are hidden for students the tab is hidden for them as well
                 // in this case mark the tab for admins so they are aware
                 if (visibleSections <= hiddenSections) {
                     $(this).addClass('hidden-tab');
-                     console.log("==> marking hidden tab "+tabid);
+                    console.log("==> marking hidden tab "+tabid);
                     var self = $(this);
                     require(['core/str'], function(str) {
                         var getTheString = str.get_string('hidden_tab_hint', 'format_tabbedtopics');
@@ -132,28 +132,26 @@ define(['jquery', 'jqueryui'], function($) {
                 }
 
                 if (visibleSections < 1) {
-                     console.log('tab with no visible sections - hiding it');
+                    console.log('tab with no visible sections - hiding it');
                     $(this).parent().hide();
 
-                    // restoring generic tab name
+                    // Restoring generic tab name
                     var courseid = $('#courseid').attr('courseid');
-//                    var courseid = 10562;
-                    var tabnr = $(this).attr('id').substring(3);
+                    var genericTitle = $(this).attr('generic_title');
                     $.ajax({
                         url: "format/tabbedtopics/ajax/update_tab_name.php",
-                        //url: "format/qmultc/ajax/dummy2.php",
                         type: "POST",
-                        data: {'courseid': courseid, 'tabid': tabid, 'tab_name': 'Tab '+tabnr},
+                        data: {'courseid': courseid, 'tabid': tabid, 'tab_name': genericTitle},
                         success: function(result) {
                             if(result !== '') {
-                                console.log('Reset name of tab ID ' + tabid + ' to "' + result + '"');
-                                $('[data-itemid=' + result + ']').attr('data-value', 'Tab ' +
-                                    tabnr).find('.quickeditlink').html('Tab ' + tabnr);
+                               console.log('Reset name of tab ID ' + tabid + ' to "' + result + '"');
+                                $('[data-itemid=' + result + ']').attr('data-value', genericTitle).
+                                find('.quickeditlink').html(genericTitle);
                             }
                         }
                     });
                 } else {
-                     console.log('tab with visible sections - showing it');
+                    console.log('tab with visible sections - showing it');
                     $(this).parent().show();
                 }
 
@@ -354,11 +352,10 @@ define(['jquery', 'jqueryui'], function($) {
                 var draggedTab = ui.draggable.find('.topictab').first();
                 var targetTab = $(this).find('.topictab').first();
 
-
-//For development purposes only - not used in production environments
-//                var draggedTab_id = draggedTab.attr('id');
-//                var targetTab_id = targetTab.attr('id');
-//                console.log('The tab with ID "' + draggedTab_id + '" was dropped onto tab with the ID "' + targetTab_id + '"');
+// For development purposes only - not used in production environments
+                var draggedTab_id = draggedTab.attr('id');
+                var targetTab_id = targetTab.attr('id');
+                console.log('The tab with ID "' + draggedTab_id + '" was dropped onto tab with the ID "' + targetTab_id + '"');
 
                 // Swap both tabs
                 var zwischenspeicher = draggedTab.parent().html();
@@ -390,9 +387,9 @@ define(['jquery', 'jqueryui'], function($) {
                     url: "format/tabbedtopics/ajax/update_tab_seq.php",
                     type: "POST",
                     data: {'sectionid': sectionid, 'tab_seq': tabSeq},
-                    success: function() {
-// X                    success: function(result) {
-                        // X console.log('the new tab sequence: ' + result);
+//                    success: function() {
+                    success: function(result) {
+                        console.log('the new tab sequence: ' + result);
                     }});
             };
 

@@ -190,7 +190,7 @@ class format_tabbedtopics extends format_topics {
         return $rv;
     }
 
-// move section ID and section number to tab format settings of a given tab
+    // move section ID and section number to tab format settings of a given tab
     public function move2tab($tabnum, $section2move, $settings) {
         global $PAGE;
         global $DB;
@@ -209,7 +209,7 @@ class format_tabbedtopics extends format_topics {
         return $settings;
     }
 
-// remove section id from all tab format settings
+    // remove section id from all tab format settings
     public function removefromtabs($course, $section2remove, $settings) {
         global $CFG;
         global $DB;
@@ -242,7 +242,7 @@ class format_tabbedtopics extends format_topics {
         return $settings;
     }
 
-// switch to show section0 always on top of the tabs
+    // switch to show section0 always on top of the tabs
     public function sectionzeroswitch($settings, $value) {
         $settings['section0_ontop'] = $value;
         $this->update_course_format_options($settings);
