@@ -78,29 +78,24 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
 
         // display section-0 on top of tabs if option is checked
         if($format_options['section0_ontop']) {
-            echo html_writer::start_tag('div', array('id' => 'ontop_area', 'class' => 'section0_ontop'));
             $section0 = $sections[0];
-//            echo $this->start_section_list();
-            if($format_options['single_section_tabs']) {
-                echo html_writer::start_tag('ul', array('class' => 'topics single_section_tabs'));
-            } else {
-                echo html_writer::start_tag('ul', array('class' => 'topics'));
-            }
+//            echo html_writer::start_tag('div', array('id' => 'ontop_area', 'class' => 'section0_ontop'));
+            echo html_writer::start_tag('div', array('id' => 'ontop_area', 'class' => 'section0_ontop'));
+            echo html_writer::start_tag('ul', array('id' => 'ontop_area', 'class' => 'topics'));
 
             // 0-section is displayed a little different then the others
             if ($section0->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
                 echo $this->section0_ontop_header($section0, $course, false, 0);
-//                echo $this->section_header($section0, $course, false, 0);
                 echo $this->courserenderer->course_section_cm_list($course, $section0, 0);
                 echo $this->courserenderer->course_section_add_cm_control($course, 0, 0);
                 echo $this->section_footer();
-                echo "<p>";
             }
-            echo $this->end_section_list();
         } else {
             echo html_writer::start_tag('div', array('id' => 'ontop_area'));
+            echo html_writer::start_tag('ul', array('id' => 'ontop_area', 'class' => 'topics'));
         }
 
+        echo $this->end_section_list();
         echo html_writer::end_tag('div');
 
         // the tab navigation

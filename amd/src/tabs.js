@@ -249,7 +249,7 @@ define(['jquery', 'jqueryui'], function($) {
             // Moving section0 to the ontop area
             var moveOntop = function() {
                 $(".ontop_mover").on('click', function() {
-                    $("#ontop_area").append($(this).closest('.section')).addClass('section0_ontop');
+                    $("ul#ontop_area").append($(this).closest('.section')).addClass('section0_ontop');
 //                    $("#ontop_area").addClass('section0_ontop');
                     $("#section-0").removeClass('main');
                 });
