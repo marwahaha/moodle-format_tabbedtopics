@@ -251,6 +251,7 @@ define(['jquery', 'jqueryui'], function($) {
                 $(".ontop_mover").on('click', function() {
                     $("#ontop_area").append($(this).closest('.section')).addClass('section0_ontop');
 //                    $("#ontop_area").addClass('section0_ontop');
+                    $("#section-0").removeClass('main');
                 });
             };
 
@@ -260,6 +261,7 @@ define(['jquery', 'jqueryui'], function($) {
                 $(".inline_mover").on('click', function() {
                     var sectionid = $(this).closest('.section').attr('section-id');
                     $("#inline_area").append($(this).closest('.section'));
+                    $("#section-0").addClass('main');
                     // Remove the 'section0_ontop' class
                     $('.section0_ontop').removeClass('section0_ontop');
                     // Find the former tab for section0 if any and click it
