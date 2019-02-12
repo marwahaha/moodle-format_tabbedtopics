@@ -73,37 +73,73 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         $sections = $modinfo->get_section_info_all();
 
         // add an invisible div that carries the course ID to be used by JS
-        echo html_writer::start_tag('div', array('id' => 'courseid', 'courseid' => $course->id));
+        // add class 'single_section_tabs' when option is set so JS can play accordingly
+        $class = ($format_options['single_section_tabs'] ? 'single_section_tabs' : '');
+        echo html_writer::start_tag('div', array('id' => 'courseid', 'courseid' => $course->id, 'class' => $class));
         echo html_writer::end_tag('div');
 
         // display section-0 on top of tabs if option is checked
-        if($format_options['section0_ontop']) {
-            $section0 = $sections[0];
-//            echo html_writer::start_tag('div', array('id' => 'ontop_area', 'class' => 'section0_ontop'));
-            echo html_writer::start_tag('div', array('id' => 'ontop_area', 'class' => 'section0_ontop'));
-            echo html_writer::start_tag('ul', array('id' => 'ontop_area', 'class' => 'topics'));
-
-            // 0-section is displayed a little different then the others
-            if ($section0->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
-                echo $this->section0_ontop_header($section0, $course, false, 0);
-                echo $this->courserenderer->course_section_cm_list($course, $section0, 0);
-                echo $this->courserenderer->course_section_add_cm_control($course, 0, 0);
-                echo $this->section_footer();
-            }
-        } else {
-            echo html_writer::start_tag('div', array('id' => 'ontop_area'));
-            echo html_writer::start_tag('ul', array('id' => 'ontop_area', 'class' => 'topics'));
-        }
-
-        echo $this->end_section_list();
-        echo html_writer::end_tag('div');
+        echo $this->render_section0_ontop($course, $sections, $format_options, $modinfo);
 
         // the tab navigation
-        $result = $this->prepare_tabs($course, $format_options, $sections);
-        $tabs = $result['tabs'];
+        $tabs = $this->prepare_tabs($course, $format_options, $sections);
 
         // rendering the tab navigation
-        echo html_writer::start_tag('ul', array('class'=>'tabs nav nav-tabs row'));
+        $rentabs = $this->render_tabs($format_options);
+        echo $rentabs;
+
+        // the sections
+        echo $this->start_section_list();
+
+        // Render the sections
+        echo $this->render_sections($course, $sections, $format_options, $modinfo, $numsections);
+
+        // Show hidden sections to users with update abilities only
+        echo $this->render_hidden_sections($course, $sections, $context, $modinfo, $numsections);
+
+        echo $this->end_section_list();
+
+    }
+
+    // Prepare the tabs for rendering
+    public function prepare_tabs($course, $format_options, $sections) {
+        global $CFG, $DB, $PAGE;
+
+        // prepare a maximum of 10 user tabs (0..9)
+        $max_tabs = 9;
+        $tabs = array();
+
+        // preparing the tabs
+        $count_tabs = 0;
+        for ($i = 0; $i <= $max_tabs; $i++) {
+            $tab_sections = '';
+            $tab_section_nums = '';
+
+            // check section IDs and section numbers for tabs other than tab0
+            if($i > 0) {
+                $tab_sections = str_replace(' ', '', $format_options['tab' . $i]);
+                $tab_section_nums = str_replace(' ', '', $format_options['tab' . $i. '_sectionnums']);
+                $section_ids = explode(',', $tab_sections);
+                $section_nums = explode(',', $tab_section_nums);
+                $tab_sections = $this->check_section_ids($course->id, $sections, $section_ids, $section_nums, $tab_sections, $tab_section_nums,$i);
+            }
+
+            $tab = new stdClass();
+            $tab->id = "tab" . $i;
+            $tab->name = "tab" . $i;
+            $tab->title = $format_options['tab' . $i . '_title'];
+            $tab->generic_title = ($i === 0 ? get_string('tab0_generic_name', 'format_tabbedtopics'):'Tab '.$i);
+            $tab->sections = $tab_sections;
+            $tab->section_nums = $tab_section_nums;
+            $tabs[$tab->id] = $tab;
+        }
+        $this->tabs = $tabs;
+        return $tabs;
+    }
+
+    // Render the tabs in sequence order if present or ascending otherwise
+    public function render_tabs($format_options) {
+        $o = html_writer::start_tag('ul', array('class'=>'tabs nav nav-tabs row'));
 
         $tab_seq = array();
         if ($format_options['tab_seq']) {
@@ -111,41 +147,303 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         }
 
         // if a tab sequence is equal to the number of tabs is found use it to arrange the tabs otherwise show them in default order
-        if(sizeof($tab_seq) == sizeof($tabs)) {
+        if(sizeof($tab_seq) == sizeof($this->tabs)) {
             foreach ($tab_seq as $tabid) {
-                $tab = $tabs[$tabid];
-                $this->render_tab($tab);
+                $tab = $this->tabs[$tabid];
+                $o .= $this->render_tab($tab);
             }
         } else {
-            foreach ($tabs as $tab) {
-                $this->render_tab($tab);
+            foreach ($this->tabs as $tab) {
+                $o .= $this->render_tab($tab);
             }
         }
-        echo html_writer::end_tag('ul');
+        $o .= html_writer::end_tag('ul');
 
-        // the sections
-//        echo $this->start_section_list();
-        if($format_options['single_section_tabs']) {
-            echo html_writer::start_tag('ul', array('class' => 'topics single_section_tabs'));
+        return $o;
+    }
+
+    // Render a standard tab
+    public function render_tab($tab) {
+        global $DB, $PAGE, $OUTPUT;
+        $o = '';
+        if($tab->sections == '') {
+            $o .= html_writer::start_tag('li', array('class'=>'tabitem nav-item', 'style' => 'display:none;'));
         } else {
-            echo html_writer::start_tag('ul', array('class' => 'topics'));
+            $o .= html_writer::start_tag('li', array('class'=>'tabitem nav-item'));
         }
+
+        $sections_array = explode(',', str_replace(' ', '', $tab->sections));
+        if($sections_array[0]) {
+            while ($sections_array[0] == "0") { // remove any occurences of section-0
+                array_shift($sections_array);
+            }
+        }
+
+        if($PAGE->user_is_editing()) {
+            // get the format option record for the given tab - we need the id
+            // if the record does not exist, create it first
+            if(!$DB->record_exists('course_format_options', array('courseid' => $PAGE->course->id, 'name' => $tab->id.'_title'))) {
+                $record = new stdClass();
+                $record->courseid = $PAGE->course->id;
+                $record->format = 'tabbedtopics';
+                $record->section = 0;
+                $record->name = $tab->id.'_title';
+                $record->value = ($tab->id == 'tab0' ? get_string('tabzero_title', 'format_tabbedtopics') :'Tab '.substr($tab->id,3));
+                $DB->insert_record('course_format_options', $record);
+            }
+
+            $format_option_tab = $DB->get_record('course_format_options', array('courseid' => $PAGE->course->id, 'name' => $tab->id.'_title'));
+            $itemid = $format_option_tab->id;
+        } else {
+            $itemid = false;
+        }
+
+        if ($tab->id == 'tab0') {
+            $o .= '<span 
+                data-toggle="tab" id="'.$tab->id.'" 
+                sections="'.$tab->sections.'" 
+                section_nums="'.$tab->section_nums.'" 
+                class="tablink nav-link " 
+                tab_title="'.$tab->title.'", 
+                generic_title = "'.$tab->generic_title.'"
+                >';
+        } else {
+            $o .= '<span 
+                data-toggle="tab" id="'.$tab->id.'" 
+                sections="'.$tab->sections.'" 
+                section_nums="'.$tab->section_nums.'" 
+                class="tablink topictab nav-link " 
+                tab_title="'.$tab->title.'" 
+                generic_title = "'.$tab->generic_title.'" 
+                style="'.($PAGE->user_is_editing() ? 'cursor: move;' : '').'">';
+        }
+        // render the tab name as inplace_editable
+        $tmpl = new \core\output\inplace_editable('format_tabbedtopics', 'tabname', $itemid,
+            $PAGE->user_is_editing(),
+            format_string($tab->title), $tab->title, get_string('tabtitle_edithint', 'format_tabbedtopics'),  get_string('tabtitle_editlabel', 'format_tabbedtopics', format_string($tab->title)));
+        $o .= $OUTPUT->render($tmpl);
+        $o .= "</span>";
+        $o .= html_writer::end_tag('li');
+        return $o;
+    }
+
+    // Check section IDs and repair them if they have changed - most probably because a course was imported
+    public function check_section_ids($courseid, $sections, $section_ids, $section_nums, $tab_sections, $tab_section_nums, $i) {
+        global $DB;
+        // check section IDs are valid for this course - and repair them using section numbers if they are not
+        $tab_format_record = $DB->get_record('course_format_options', array('courseid' => $courseid, 'name' => 'tab'.$i));
+        $ids_have_changed = false;
+        $new_section_nums = array();
+
+        foreach($section_ids as $index => $section_id) {
+            if(isset($sections[$section_id])) {
+                if($section = $sections[$section_id]) {
+                    $new_section_nums[] = $section->section;
+                }
+                if($section_id && !($section)) {
+                    $section = $DB->get_record('course_sections', array('course' => $courseid, 'section' => $section_nums[$index]));
+                    $tab_sections = str_replace($section_id, $section->id, $tab_sections);
+                    $ids_have_changed = true;
+                }
+            }
+        }
+
+        if($ids_have_changed) {
+            $DB->update_record('course_format_options', array('id' => $tab_format_record->id, 'value' => $tab_sections));
+        }
+        else { // all IDs are good - so check stored section numbers and restore them with the real numbers in case they have changed
+            $new_sectionnums = implode(',', $new_section_nums);
+            if($tab_section_nums !== $new_sectionnums) { // the stored section numbers seems to be different
+                if($DB->record_exists('course_format_options', array('courseid' => $courseid, 'name' => 'tab'.$i.'_sectionnums'))) {
+                    $tab_format_record = $DB->get_record('course_format_options', array('courseid' => $courseid, 'name' => 'tab'.$i.'_sectionnums'));
+                    $DB->update_record('course_format_options', array('id' => $tab_format_record->id, 'value' => $new_sectionnums));
+                } else {
+                    $new_tab_format_record = new \stdClass();
+                    $new_tab_format_record->courseid = $courseid;
+                    $new_tab_format_record->format = 'tabbedtopics';
+                    $new_tab_format_record->sectionid = 0;
+                    $new_tab_format_record->name = 'tab'.$i.'_sectionnums';
+                    $new_tab_format_record->value = $new_sectionnums;
+                    $DB->insert_record('course_format_options', $new_tab_format_record);
+                }
+            }
+        }
+        return $tab_sections;
+    }
+
+    // A slightly different header for section-0 when showing on top
+    protected function section0_ontop_header($section, $course, $onsectionpage, $sectionreturn=null) {
+        global $PAGE;
+
+        $o = '';
+        $sectionstyle = '';
+
+        if ($section->section != 0) {
+            // Only in the non-general sections.
+            if (!$section->visible) {
+                $sectionstyle = ' hidden';
+            }
+            if (course_get_format($course)->is_section_current($section)) {
+                $sectionstyle = ' current';
+            }
+        }
+
+        $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section, 'section-id' => $section->id,
+            'class' => 'section clearfix'.$sectionstyle, 'role'=>'region',
+            'aria-label'=> get_section_name($course, $section)));
+
+        // Create a span that contains the section title to be used to create the keyboard section move menu.
+        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
+
+        $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
+
+        $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
+        $o.= html_writer::start_tag('div', array('class' => 'content'));
+
+        // When not on a section page, we display the section titles except the general section if null
+        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
+
+        // When on a section page, we only display the general section title, if title is not the default one
+        $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
+
+        $classes = ' accesshide';
+        if ($hasnamenotsecpg || $hasnamesecpg) {
+            $classes = '';
+        }
+        $sectionname = html_writer::tag('span', $this->section_title($section, $course));
+        $o.= $this->output->heading($sectionname, 3, 'sectionname' . $classes);
+
+        $o .= $this->section_availability($section);
+
+        $o .= html_writer::start_tag('div', array('class' => 'summary'));
+        if ($section->uservisible || $section->visible) {
+            // Show summary if section is available or has availability restriction information.
+            // Do not show summary if section is hidden but we still display it because of course setting
+            // "Hidden sections are shown in collapsed form".
+            $o .= $this->format_summary_text($section);
+        }
+        $o .= html_writer::end_tag('div');
+
+        return $o;
+    }
+
+    /**
+     * Generate the display of the header part of a section before
+     * course modules are included
+     *
+     * @param stdClass $section The course_section entry from DB
+     * @param stdClass $course The course entry from DB
+     * @param bool $onsectionpage true if being printed on a single-section page
+     * @param int $sectionreturn The section to return to after an action
+     * @return string HTML to output.
+     */
+    protected function section_header($section, $course, $onsectionpage, $sectionreturn=null) {
+        global $PAGE;
+
+        $o = '';
+        $currenttext = '';
+        $sectionstyle = '';
+
+        if ($section->section != 0) {
+            // Only in the non-general sections.
+            if (!$section->visible) {
+                $sectionstyle = ' hidden';
+            }
+            if (course_get_format($course)->is_section_current($section)) {
+                $sectionstyle = ' current';
+            }
+        }
+
+        $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section, 'section-id' => $section->id,
+            'class' => 'section main clearfix'.$sectionstyle, 'role'=>'region',
+            'aria-label'=> get_section_name($course, $section)));
+
+        // Create a span that contains the section title to be used to create the keyboard section move menu.
+        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
+
+        $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
+
+        $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
+        $o.= html_writer::start_tag('div', array('class' => 'content'));
+
+        // When not on a section page, we display the section titles except the general section if null
+        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
+
+        // When on a section page, we only display the general section title, if title is not the default one
+        $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
+
+        $classes = ' accesshide';
+        if ($hasnamenotsecpg || $hasnamesecpg) {
+            $classes = '';
+        }
+        $sectionname = html_writer::tag('span', $this->section_title($section, $course));
+        $o.= $this->output->heading($sectionname, 3, 'sectionname' . $classes);
+
+        $o .= $this->section_availability($section);
+
+        $o .= html_writer::start_tag('div', array('class' => 'summary'));
+        if ($section->uservisible || $section->visible) {
+            // Show summary if section is available or has availability restriction information.
+            // Do not show summary if section is hidden but we still display it because of course setting
+            // "Hidden sections are shown in collapsed form".
+            $o .= $this->format_summary_text($section);
+        }
+        $o .= html_writer::end_tag('div');
+
+        return $o;
+    }
+
+    // display section-0 on top of tabs if option is checked
+    public function render_section0_ontop($course, $sections, $format_options, $modinfo) {
+        global $PAGE;
+        $o = '';
+        if($format_options['section0_ontop']) {
+            $section0 = $sections[0];
+            $o .= html_writer::start_tag('div', array('id' => 'ontop_area', 'class' => 'section0_ontop'));
+            $o .= html_writer::start_tag('ul', array('id' => 'ontop_area', 'class' => 'topics'));
+
+            // 0-section is displayed a little different then the others
+            if ($section0->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
+                $o .= $this->section0_ontop_header($section0, $course, false, 0);
+                $o .= $this->courserenderer->course_section_cm_list($course, $section0, 0);
+                $o .= $this->courserenderer->course_section_add_cm_control($course, 0, 0);
+                $o .= $this->section_footer();
+            }
+        } else {
+            $o .= html_writer::start_tag('div', array('id' => 'ontop_area'));
+            $o .= html_writer::start_tag('ul', array('id' => 'ontop_area', 'class' => 'topics'));
+        }
+
+        $o .= $this->end_section_list();
+        $o .= html_writer::end_tag('div');
+        return $o;
+    }
+
+    // Render the sections of a course
+    public function render_sections($course, $sections, $format_options, $modinfo, $numsections){
+        global $PAGE;
+
+        $o = '';
 
         foreach ($sections as $section => $thissection) {
             if ($section == 0) {
-                echo html_writer::start_tag('div', array('id' => 'inline_area'));
+                $o .= html_writer::start_tag('div', array('id' => 'inline_area'));
                 if($format_options['section0_ontop']){ // section-0 is already shown on top
-                    echo html_writer::end_tag('div');
+                    $o .= html_writer::end_tag('div');
                     continue;
                 }
                 // 0-section is displayed a little different then the others
                 if ($thissection->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
-                    echo $this->section_header($thissection, $course, false, 0);
-                    echo $this->courserenderer->course_section_cm_list($course, $thissection, 0);
-                    echo $this->courserenderer->course_section_add_cm_control($course, 0, 0);
-                    echo $this->section_footer();
+                    $o .= $this->section_header($thissection, $course, false, 0);
+                    $o .= $this->courserenderer->course_section_cm_list($course, $thissection, 0);
+                    $o .= $this->courserenderer->course_section_add_cm_control($course, 0, 0);
+                    $o .= $this->section_footer();
                 }
-                echo html_writer::end_tag('div');
+                $o .= html_writer::end_tag('div');
                 continue;
             }
             if ($section > $numsections) {
@@ -164,36 +462,37 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
 
             if (!$PAGE->user_is_editing() && $course->coursedisplay == COURSE_DISPLAY_MULTIPAGE) {
                 // Display section summary only.
-                echo $this->section_summary($thissection, $course, null);
+                $o .= $this->section_summary($thissection, $course, null);
             } else {
-                echo $this->section_header($thissection, $course, false, 0);
+                $o .= $this->section_header($thissection, $course, false, 0);
                 if ($thissection->uservisible) {
-                    echo $this->courserenderer->course_section_cm_list($course, $thissection, 0);
-                    echo $this->courserenderer->course_section_add_cm_control($course, $section, 0);
+                    $o .= $this->courserenderer->course_section_cm_list($course, $thissection, 0);
+                    $o .= $this->courserenderer->course_section_add_cm_control($course, $section, 0);
                 }
-                echo $this->section_footer();
+                $o .= $this->section_footer();
             }
         }
+        return $o;
+    }
 
+    // Render hidden sections for course editors only
+    public function render_hidden_sections($course, $sections, $context, $modinfo, $numsections) {
+        global $PAGE;
+        $o ='';
         if ($PAGE->user_is_editing() and has_capability('moodle/course:update', $context)) {
             // Print stealth sections if present.
-            foreach ($modinfo->get_section_info_all() as $section => $thissection) {
+            foreach ($sections as $section => $thissection) {
                 if ($section <= $numsections or empty($modinfo->sections[$section])) {
                     // this is not stealth section or it is empty
                     continue;
                 }
-                echo $this->stealth_section_header($section);
-                echo $this->courserenderer->course_section_cm_list($course, $thissection, 0);
-                echo $this->stealth_section_footer();
+                $o .= $this->stealth_section_header($section);
+                $o .= $this->courserenderer->course_section_cm_list($course, $thissection, 0);
+                $o .= $this->stealth_section_footer();
             }
-
-            echo $this->end_section_list();
-
-            echo $this->change_number_sections($course, 0);
-        } else {
-            echo $this->end_section_list();
+            $o .= $this->change_number_sections($course, 0);
         }
-
+        return $o;
     }
 
     /**
@@ -298,19 +597,19 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
                 $markedthistopic = get_string('markedthistopic');
                 $highlightoff = get_string('highlightoff');
                 $controls['highlight'] = array('url' => $url, "icon" => 'i/marked',
-                                               'name' => $highlightoff,
-                                               'pixattr' => array('class' => '', 'alt' => $markedthistopic),
-                                               'attr' => array('class' => 'editing_highlight', 'title' => $markedthistopic,
-                                                   'data-action' => 'removemarker'));
+                    'name' => $highlightoff,
+                    'pixattr' => array('class' => '', 'alt' => $markedthistopic),
+                    'attr' => array('class' => 'editing_highlight', 'title' => $markedthistopic,
+                        'data-action' => 'removemarker'));
             } else {
                 $url->param('marker', $section->section);
                 $markthistopic = get_string('markthistopic');
                 $highlight = get_string('highlight');
                 $controls['highlight'] = array('url' => $url, "icon" => 'i/marker',
-                                               'name' => $highlight,
-                                               'pixattr' => array('class' => '', 'alt' => $markthistopic),
-                                               'attr' => array('class' => 'editing_highlight', 'title' => $markthistopic,
-                                                   'data-action' => 'setmarker'));
+                    'name' => $highlight,
+                    'pixattr' => array('class' => '', 'alt' => $markthistopic),
+                    'attr' => array('class' => 'editing_highlight', 'title' => $markthistopic,
+                        'data-action' => 'setmarker'));
             }
         }
 
@@ -335,328 +634,5 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         }
     }
 
-    /**
-     * Generate the display of the header part of a section before
-     * course modules are included
-     *
-     * @param stdClass $section The course_section entry from DB
-     * @param stdClass $course The course entry from DB
-     * @param bool $onsectionpage true if being printed on a single-section page
-     * @param int $sectionreturn The section to return to after an action
-     * @return string HTML to output.
-     */
-    protected function section_header($section, $course, $onsectionpage, $sectionreturn=null) {
-        global $PAGE;
-
-        $o = '';
-        $currenttext = '';
-        $sectionstyle = '';
-
-        if ($section->section != 0) {
-            // Only in the non-general sections.
-            if (!$section->visible) {
-                $sectionstyle = ' hidden';
-            }
-            if (course_get_format($course)->is_section_current($section)) {
-                $sectionstyle = ' current';
-            }
-        }
-
-        $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section, 'section-id' => $section->id,
-            'class' => 'section main clearfix'.$sectionstyle, 'role'=>'region',
-            'aria-label'=> get_section_name($course, $section)));
-
-        // Create a span that contains the section title to be used to create the keyboard section move menu.
-        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
-
-        $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
-        $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
-
-        $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
-        $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
-        $o.= html_writer::start_tag('div', array('class' => 'content'));
-
-        // When not on a section page, we display the section titles except the general section if null
-        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
-
-        // When on a section page, we only display the general section title, if title is not the default one
-        $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
-
-        $classes = ' accesshide';
-        if ($hasnamenotsecpg || $hasnamesecpg) {
-            $classes = '';
-        }
-        $sectionname = html_writer::tag('span', $this->section_title($section, $course));
-        $o.= $this->output->heading($sectionname, 3, 'sectionname' . $classes);
-
-        $o .= $this->section_availability($section);
-
-        $o .= html_writer::start_tag('div', array('class' => 'summary'));
-        if ($section->uservisible || $section->visible) {
-            // Show summary if section is available or has availability restriction information.
-            // Do not show summary if section is hidden but we still display it because of course setting
-            // "Hidden sections are shown in collapsed form".
-            $o .= $this->format_summary_text($section);
-        }
-        $o .= html_writer::end_tag('div');
-
-        return $o;
-    }
-
-    protected function section0_ontop_header($section, $course, $onsectionpage, $sectionreturn=null) {
-        global $PAGE;
-
-        $o = '';
-        $sectionstyle = '';
-
-        if ($section->section != 0) {
-            // Only in the non-general sections.
-            if (!$section->visible) {
-                $sectionstyle = ' hidden';
-            }
-            if (course_get_format($course)->is_section_current($section)) {
-                $sectionstyle = ' current';
-            }
-        }
-
-        $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section, 'section-id' => $section->id,
-            'class' => 'section clearfix'.$sectionstyle, 'role'=>'region',
-            'aria-label'=> get_section_name($course, $section)));
-
-        // Create a span that contains the section title to be used to create the keyboard section move menu.
-        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
-
-        $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
-        $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
-
-        $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
-        $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
-        $o.= html_writer::start_tag('div', array('class' => 'content'));
-
-        // When not on a section page, we display the section titles except the general section if null
-        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
-
-        // When on a section page, we only display the general section title, if title is not the default one
-        $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
-
-        $classes = ' accesshide';
-        if ($hasnamenotsecpg || $hasnamesecpg) {
-            $classes = '';
-        }
-        $sectionname = html_writer::tag('span', $this->section_title($section, $course));
-        $o.= $this->output->heading($sectionname, 3, 'sectionname' . $classes);
-
-        $o .= $this->section_availability($section);
-
-        $o .= html_writer::start_tag('div', array('class' => 'summary'));
-        if ($section->uservisible || $section->visible) {
-            // Show summary if section is available or has availability restriction information.
-            // Do not show summary if section is hidden but we still display it because of course setting
-            // "Hidden sections are shown in collapsed form".
-            $o .= $this->format_summary_text($section);
-        }
-        $o .= html_writer::end_tag('div');
-
-        return $o;
-    }
-    protected function section0_ontop_header0($section, $course, $onsectionpage, $sectionreturn=null) {
-        global $PAGE;
-
-        $o = '';
-        $sectionstyle = '';
-
-        if ($section->section != 0) {
-            // Only in the non-general sections.
-            if (!$section->visible) {
-                $sectionstyle = ' hidden';
-            }
-            if (course_get_format($course)->is_section_current($section)) {
-                $sectionstyle = ' current';
-            }
-        }
-
-        $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section, 'section-id' => $section->id,
-            'class' => 'section ontop main clearfix'.$sectionstyle, 'role'=>'region',
-            'aria-label'=> get_section_name($course, $section)));
-
-        // Create a span that contains the section title to be used to create the keyboard section move menu.
-        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
-
-        $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
-        $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
-
-        $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
-        $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
-        $o.= html_writer::start_tag('div', array('class' => 'content'));
-
-        // When not on a section page, we display the section titles except the general section if null
-        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
-
-        // When on a section page, we only display the general section title, if title is not the default one
-        $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
-
-        $classes = ' accesshide';
-        if ($hasnamenotsecpg || $hasnamesecpg) {
-            $classes = '';
-        }
-        $sectionname = html_writer::tag('span', $this->section_title($section, $course));
-        $o.= $this->output->heading($sectionname, 3, 'sectionname' . $classes);
-
-//        $o .= $this->section_availability($section);
-
-//        $o .= html_writer::start_tag('div', array('class' => 'summary'));
-        if ($section->uservisible || $section->visible) {
-            // Show summary if section is available or has availability restriction information.
-            // Do not show summary if section is hidden but we still display it because of course setting
-            // "Hidden sections are shown in collapsed form".
-            $o .= $this->format_summary_text($section);
-        }
-//        $o .= html_writer::end_tag('div');
-
-        return $o;
-    }
-
-    public function prepare_tabs($course, $format_options, $sections) {
-        global $CFG, $DB, $PAGE;
-
-        // prepare a maximum of 10 user tabs (0..9)
-        $max_tabs = 9;
-        $tabs = array();
-
-        // preparing the tabs
-        $count_tabs = 0;
-        for ($i = 0; $i <= $max_tabs; $i++) {
-            $tab_sections = '';
-            $tab_section_nums = '';
-
-            // check section IDs and section numbers for tabs other than tab0
-            if($i > 0) {
-                $tab_sections = str_replace(' ', '', $format_options['tab' . $i]);
-                $tab_section_nums = str_replace(' ', '', $format_options['tab' . $i. '_sectionnums']);
-                $section_ids = explode(',', $tab_sections);
-                $section_nums = explode(',', $tab_section_nums);
-                $tab_sections = $this->check_section_ids($course->id, $sections, $section_ids, $section_nums, $tab_sections, $tab_section_nums,$i);
-            }
-
-            $tab = new stdClass();
-            $tab->id = "tab" . $i;
-            $tab->name = "tab" . $i;
-            $tab->title = $format_options['tab' . $i . '_title'];
-            $tab->generic_title = 'Tab '.$i;
-            $tab->sections = $tab_sections;
-            $tab->section_nums = $tab_section_nums;
-            $tabs[$tab->id] = $tab;
-            if ($tab_sections != null) {
-                $count_tabs++;
-            }
-        }
-        return array('tabs' => $tabs, 'count_tabs' => $count_tabs);
-    }
-
-    public function render_tab($tab) {
-        global $DB, $PAGE, $OUTPUT;
-        if($tab->sections == '') {
-            echo html_writer::start_tag('li', array('class'=>'tabitem nav-item', 'style' => 'display:none;'));
-        } else {
-            echo html_writer::start_tag('li', array('class'=>'tabitem nav-item'));
-        }
-
-        $sections_array = explode(',', str_replace(' ', '', $tab->sections));
-        if($sections_array[0]) {
-            while ($sections_array[0] == "0") { // remove any occurences of section-0
-                array_shift($sections_array);
-            }
-        }
-
-        if($PAGE->user_is_editing()) {
-            // get the format option record for the given tab - we need the id
-            // if the record does not exist, create it first
-            if(!$DB->record_exists('course_format_options', array('courseid' => $PAGE->course->id, 'name' => $tab->id.'_title'))) {
-                $record = new stdClass();
-                $record->courseid = $PAGE->course->id;
-                $record->format = 'tabbedtopics';
-                $record->section = 0;
-                $record->name = $tab->id.'_title';
-                $record->value = ($tab->id == 'tab0' ? get_string('tabzero_title', 'format_tabbedtopics') :'Tab '.substr($tab->id,3));
-                $DB->insert_record('course_format_options', $record);
-            }
-
-            $format_option_tab = $DB->get_record('course_format_options', array('courseid' => $PAGE->course->id, 'name' => $tab->id.'_title'));
-            $itemid = $format_option_tab->id;
-        } else {
-            $itemid = false;
-        }
-
-        if ($tab->id == 'tab0') {
-            echo '<span 
-                data-toggle="tab" id="'.$tab->id.'" 
-                sections="'.$tab->sections.'" 
-                section_nums="'.$tab->section_nums.'" 
-                class="tablink nav-link " 
-                tab_title="'.$tab->title.'", 
-                generic_title = "'.$tab->generic_title.'"
-                >';
-        } else {
-            echo '<span 
-                data-toggle="tab" id="'.$tab->id.'" 
-                sections="'.$tab->sections.'" 
-                section_nums="'.$tab->section_nums.'" 
-                class="tablink topictab nav-link " 
-                tab_title="'.$tab->title.'" 
-                generic_title = "'.$tab->generic_title.'" 
-                style="'.($PAGE->user_is_editing() ? 'cursor: move;' : '').'">';
-        }
-        // render the tab name as inplace_editable
-        $tmpl = new \core\output\inplace_editable('format_tabbedtopics', 'tabname', $itemid,
-            $PAGE->user_is_editing(),
-            format_string($tab->title), $tab->title, get_string('tabtitle_edithint', 'format_tabbedtopics'),  get_string('tabtitle_editlabel', 'format_tabbedtopics', format_string($tab->title)));
-        echo $OUTPUT->render($tmpl);
-        echo "</span>";
-        echo html_writer::end_tag('li');
-    }
-
-    // Check section IDs and repair them if they have changed - most probably because a course was imported
-    public function check_section_ids($courseid, $sections, $section_ids, $section_nums, $tab_sections, $tab_section_nums, $i) {
-        global $DB;
-        // check section IDs are valid for this course - and repair them using section numbers if they are not
-        $tab_format_record = $DB->get_record('course_format_options', array('courseid' => $courseid, 'name' => 'tab'.$i));
-        $ids_have_changed = false;
-        $new_section_nums = array();
-
-        foreach($section_ids as $index => $section_id) {
-            if(isset($sections[$section_id])) {
-                if($section = $sections[$section_id]) {
-                    $new_section_nums[] = $section->section;
-                }
-                if($section_id && !($section)) {
-                    $section = $DB->get_record('course_sections', array('course' => $courseid, 'section' => $section_nums[$index]));
-                    $tab_sections = str_replace($section_id, $section->id, $tab_sections);
-                    $ids_have_changed = true;
-                }
-            }
-        }
-
-        if($ids_have_changed) {
-            $DB->update_record('course_format_options', array('id' => $tab_format_record->id, 'value' => $tab_sections));
-        }
-        else { // all IDs are good - so check stored section numbers and restore them with the real numbers in case they have changed
-            $new_sectionnums = implode(',', $new_section_nums);
-            if($tab_section_nums !== $new_sectionnums) { // the stored section numbers seems to be different
-                if($DB->record_exists('course_format_options', array('courseid' => $courseid, 'name' => 'tab'.$i.'_sectionnums'))) {
-                    $tab_format_record = $DB->get_record('course_format_options', array('courseid' => $courseid, 'name' => 'tab'.$i.'_sectionnums'));
-                    $DB->update_record('course_format_options', array('id' => $tab_format_record->id, 'value' => $new_sectionnums));
-                } else {
-                    $new_tab_format_record = new \stdClass();
-                    $new_tab_format_record->courseid = $courseid;
-                    $new_tab_format_record->format = 'tabbedtopics';
-                    $new_tab_format_record->sectionid = 0;
-                    $new_tab_format_record->name = 'tab'.$i.'_sectionnums';
-                    $new_tab_format_record->value = $new_sectionnums;
-                    $DB->insert_record('course_format_options', $new_tab_format_record);
-                }
-            }
-        }
-        return $tab_sections;
-    }
 }
 
