@@ -49,7 +49,8 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
     public function print_multiple_section_page($course, $sections, $mods, $modnames, $modnamesused) {
         global $CFG, $DB, $PAGE;
 
-        $this->page->requires->js_call_amd('format_tabbedtopics/tabs', 'init', array());
+//        $this->page->requires->js_call_amd('format_tabbedtopics/tabs', 'init', array());
+        $this->require_js();
 
         $modinfo = get_fast_modinfo($course);
         $course = course_get_format($course)->get_course();
@@ -99,6 +100,11 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
 
         echo $this->end_section_list();
 
+    }
+
+    // Require the jQuery file for this class
+    public function require_js() {
+        $this->page->requires->js_call_amd('format_tabbedtopics/tabs', 'init', array());
     }
 
     // Prepare the tabs for rendering
