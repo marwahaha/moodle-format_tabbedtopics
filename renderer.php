@@ -515,6 +515,7 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         if (!$PAGE->user_is_editing()) {
             return array();
         }
+        $sectionreturn = $onsectionpage ? $section->section : null;
         $options = $DB->get_records('course_format_options', array('courseid' => $course->id));
         $format_options=array();
         foreach($options as $option) {
@@ -621,6 +622,29 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
 
         $parentcontrols = parent::section_edit_control_items($course, $section, $onsectionpage);
 
+
+    // intercept the section deleting process because we need to remove the section from any tabs before
+/*
+        if (course_can_delete_section($course, $section)) {
+            if (get_string_manager()->string_exists('deletesection', 'format_'.$course->format)) {
+                $strdelete = get_string('deletesection', 'format_'.$course->format);
+            } else {
+                $strdelete = get_string('deletesection');
+            }
+//            $url = new moodle_url('/course/editsection.php', array(
+            $url = new moodle_url('/course/format/tabbedtopics/editsection.php', array(
+                'id' => $section->id,
+                'sr' => $sectionreturn,
+                'delete' => 1,
+                'sesskey' => sesskey()));
+            $parentcontrols['delete'] = array(
+                'url' => $url,
+                'icon' => 'i/delete',
+                'name' => $strdelete,
+                'pixattr' => array('class' => '', 'alt' => $strdelete),
+                'attr' => array('class' => 'icon editing_delete', 'title' => $strdelete));
+        }
+*/
         // If the edit key exists, we are going to insert our controls after it.
         if (array_key_exists("edit", $parentcontrols)) {
             $merged = array();

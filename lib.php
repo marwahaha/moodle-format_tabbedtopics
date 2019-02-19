@@ -250,6 +250,96 @@ class format_tabbedtopics extends format_topics {
         return $settings;
     }
 
+    public function delete_section($section, $forcedeleteifnotempty = false) {
+        global $DB;
+
+        // Before we delete the section record we need it's ID to remove it from tabs after(!) a successful deletion
+        $srec = $DB->get_record('course_sections', array('course' => $this->courseid, 'section' => $section));
+        $sectionid = $srec->id;
+
+        $what_parents_say = parent::delete_section($section, $forcedeleteifnotempty);
+        if(!$what_parents_say) {
+            return false;
+        }
+
+        // Remove sectionid and section(num) from tabs
+        $this->remove_from_tabs($section, $sectionid);
+        return $what_parents_say;
+    }
+
+    // Remove traces of a deleted section from tabs where needed
+    public function remove_from_tabs($section = false, $sectionid = false) {
+        global $DB;
+        if(!$section || !$sectionid) {
+            return false;
+        }
+        // Loop through the tabs
+        $records = $DB->get_records('course_format_options', array('courseid' => $this->courseid, 'format' => $this->format));
+        foreach($records as $option) {
+            switch($option->name) {
+                case 'tab1':
+                case 'tab2':
+                case 'tab3':
+                case 'tab4':
+                case 'tab5':
+                case 'tab6':
+                case 'tab7':
+                case 'tab8':
+                case 'tab9':
+                if(strstr($option->value, $sectionid)) {
+                    $this->remove_sectionid($option, $sectionid);
+                }
+                    break;
+                case 'tab1_sectionnums':
+                case 'tab2_sectionnums':
+                case 'tab3_sectionnums':
+                case 'tab4_sectionnums':
+                case 'tab5_sectionnums':
+                case 'tab6_sectionnums':
+                case 'tab7_sectionnums':
+                case 'tab8_sectionnums':
+                case 'tab9_sectionnums':
+                    if(strstr($option->value, $section)){
+                        $this->remove_sectionnum($option, $section);
+                    }
+                    break;
+            }
+        }
+
+    }
+
+    // Remove the section ID from tabs
+    public function remove_sectionid($option, $sectionid) {
+        global $DB;
+        $tabsections = explode(',',$option->value);
+        $new_tabsections = array();
+        foreach($tabsections as $tabsectionid) {
+            if($tabsectionid !== $sectionid) {
+                $new_tabsections[] = $tabsectionid;
+            }
+        }
+        if(sizeof(array_diff($tabsections, $new_tabsections)) > 0) {
+            $option->value = implode(',', $new_tabsections);
+            $DB->update_record('course_format_options', $option);
+        }
+    }
+
+    // Remove the section number from tabs
+    public function remove_sectionnum($option, $sectionnum) {
+        global $DB;
+        $tabsectionnums = explode(',',$option->value);
+        $new_tabsectionnums = array();
+        foreach($tabsectionnums as $tabsectionnum) {
+            if($tabsectionnum !== $sectionnum) {
+                $new_tabsectionnums[] = $tabsectionnum;
+            }
+        }
+        if(sizeof(array_diff($tabsectionnums, $new_tabsectionnums)) > 0) {
+            $option->value = implode(',', $new_tabsectionnums);
+            $DB->update_record('course_format_options', $option);
+        }
+    }
+
 }
 
 /**
