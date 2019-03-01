@@ -385,6 +385,7 @@ define(['jquery', 'jqueryui'], function($) {
                 var sectionid = $('.topictab:visible').first().attr('sections').split(',')[0];
 
                 // Finally call php to write the data
+console.log('now storing the sequence');
                 $.ajax({
                     url: "format/tabbedtopics/ajax/update_tab_seq.php",
                     type: "POST",
