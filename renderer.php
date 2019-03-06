@@ -406,6 +406,7 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
     // display section-0 on top of tabs if option is checked
     public function render_section0_ontop($course, $sections, $format_options, $modinfo) {
         global $PAGE;
+//        return '';
         $o = '';
         if($format_options['section0_ontop']) {
             $section0 = $sections[0];
@@ -435,13 +436,8 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
 
         $o = '';
 
-        foreach ($sections as $section => $thissection) {
+        foreach ($modinfo->get_section_info_all() as $section => $thissection) {
             if ($section == 0) {
-                $o .= html_writer::start_tag('div', array('id' => 'inline_area'));
-                if($format_options['section0_ontop']){ // section-0 is already shown on top
-                    $o .= html_writer::end_tag('div');
-                    continue;
-                }
                 // 0-section is displayed a little different then the others
                 if ($thissection->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
                     $o .= $this->section_header($thissection, $course, false, 0);
@@ -449,7 +445,6 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
                     $o .= $this->courserenderer->course_section_add_cm_control($course, 0, 0);
                     $o .= $this->section_footer();
                 }
-                $o .= html_writer::end_tag('div');
                 continue;
             }
             if ($section > $numsections) {
@@ -515,7 +510,7 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         if (!$PAGE->user_is_editing()) {
             return array();
         }
-        $sectionreturn = $onsectionpage ? $section->section : null;
+
         $options = $DB->get_records('course_format_options', array('courseid' => $course->id));
         $format_options=array();
         foreach($options as $option) {
@@ -622,29 +617,6 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
 
         $parentcontrols = parent::section_edit_control_items($course, $section, $onsectionpage);
 
-
-    // intercept the section deleting process because we need to remove the section from any tabs before
-/*
-        if (course_can_delete_section($course, $section)) {
-            if (get_string_manager()->string_exists('deletesection', 'format_'.$course->format)) {
-                $strdelete = get_string('deletesection', 'format_'.$course->format);
-            } else {
-                $strdelete = get_string('deletesection');
-            }
-//            $url = new moodle_url('/course/editsection.php', array(
-            $url = new moodle_url('/course/format/tabbedtopics/editsection.php', array(
-                'id' => $section->id,
-                'sr' => $sectionreturn,
-                'delete' => 1,
-                'sesskey' => sesskey()));
-            $parentcontrols['delete'] = array(
-                'url' => $url,
-                'icon' => 'i/delete',
-                'name' => $strdelete,
-                'pixattr' => array('class' => '', 'alt' => $strdelete),
-                'attr' => array('class' => 'icon editing_delete', 'title' => $strdelete));
-        }
-*/
         // If the edit key exists, we are going to insert our controls after it.
         if (array_key_exists("edit", $parentcontrols)) {
             $merged = array();
