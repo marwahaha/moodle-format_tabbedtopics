@@ -425,7 +425,7 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
             $o .= html_writer::start_tag('ul', array('id' => 'ontop_area', 'class' => 'topics'));
         }
 
-        $o .= $this->end_section_list();
+//        $o .= $this->end_section_list();
         $o .= html_writer::end_tag('div');
         return $o;
     }
