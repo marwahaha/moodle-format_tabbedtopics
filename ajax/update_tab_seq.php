@@ -31,7 +31,6 @@ function update_tab_seq($courseid, $tab_seq) {
 if(!isset($_POST['tab_seq']) || sizeof($_POST['tab_seq']) === 0) {
     exit;
 }
-echo "hi!";
 $tab_seq = $_POST['tab_seq'];
 $sectionid = $_POST['sectionid'];
 
