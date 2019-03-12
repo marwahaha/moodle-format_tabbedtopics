@@ -67,6 +67,10 @@ class format_tabbedtopics extends format_topics {
                     'default' => get_config('format_tabbedtopics', 'defaultsectionnameastabname'),
                     'type' => PARAM_BOOL
                 ),
+                'toggle_sections' => array(
+                    'default' => false,
+                    'type' => PARAM_BOOL
+                ),
             );
 
             // the sequence in which the tabs will be displayed
@@ -119,6 +123,12 @@ class format_tabbedtopics extends format_topics {
                     'label' => get_string('single_section_tabs_label', 'format_tabbedtopics'),
                     'element_type' => 'advcheckbox',
                     'help' => 'single_section_tabs',
+                    'help_component' => 'format_tabbedtopics',
+                ),
+                'toggle_sections' => array(
+                    'label' => get_string('toggle_sections_label', 'format_tabbedtopics'),
+                    'element_type' => 'advcheckbox',
+                    'help' => 'toggle_sections',
                     'help_component' => 'format_tabbedtopics',
                 ),
             );

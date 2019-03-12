@@ -58,6 +58,10 @@ $string['single_section_tabs'] = 'Use topic name as tab name for single topics';
 $string['single_section_tabs_label'] = 'Use topic name as tab name for single topics';
 $string['single_section_tabs_help'] = 'When checked tabs with a single topic will use the topic name as tab name.';
 
+$string['toggle_sections'] = 'Enable collapsing sections';
+$string['toggle_sections_label'] = 'Enable collapsing sections';
+$string['toggle_sections_help'] = 'When checked sections may be collapsed/expanded by clicking the section title.';
+
 $string['tabname'] = 'Tab';
 $string['tabzero_title'] = 'Module Content';
 $string['tabtitle_edithint'] = 'Edit tab name';
