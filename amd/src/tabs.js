@@ -169,6 +169,8 @@ define(['jquery', 'jqueryui'], function($) {
 //                        && !$('li.section:visible').first().hasClass('stealth')
                     ) {
                         changeTab($(this), target);
+                        // Make sure the content is un-hidden
+                        target.find('.toggle_area').removeClass('hidden').show();
                     } else if ($('.inplaceeditable').length > 0 && firstSectionId !== 'section-0') {
                         restoreTab($(this));
                     }

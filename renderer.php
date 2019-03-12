@@ -52,7 +52,8 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
 //        $this->page->requires->js_call_amd('format_tabbedtopics/tabs', 'init', array());
         $this->require_js();
 
-        $this->toggle_seq = '';
+        $this->toggle_seq = $this->get_toggle_seq($course);
+//        $this->toggle_seq = '';
 
         $modinfo = get_fast_modinfo($course);
         $course = course_get_format($course)->get_course();
@@ -103,6 +104,14 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         echo $this->end_section_list();
 
     }
+
+    public function get_toggle_seq($course) {
+        global $DB, $USER;
+
+        $record = $DB->get_record('user_preferences', array('userid' => $USER->id, 'name' => 'toggle_seq_'.$course->id));
+        return $record->value;
+    }
+
 
     // Require the jQuery file for this class
     public function require_js() {
@@ -287,7 +296,7 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
     }
 
     // A slightly different header for section-0 when showing on top
-    protected function section0_ontop_header($section, $course, $onsectionpage, $sectionreturn=null) {
+    protected function section0_ontop_headerxxx($section, $course, $onsectionpage, $sectionreturn=null) {
         global $PAGE;
 
         $o = '';
@@ -372,44 +381,64 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
             }
         }
 
+        // When rendering section-0 check if it is on top and adjust classes
+        if($section->section === 0 && $course->section0_ontop === 1) {
+            $classes = 'section clearfix'; // On top is not main
+        } else {
+            $classes = 'section main clearfix';
+        }
+
         $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section, 'section-id' => $section->id,
-            'class' => 'section main clearfix'.$sectionstyle, 'role'=>'region',
+//            'class' => 'section main clearfix'.$sectionstyle, 'role'=>'region',
+            'class' => $classes.$sectionstyle, 'role'=>'region',
             'aria-label'=> get_section_name($course, $section)));
 
         // Create a span that contains the section title to be used to create the keyboard section move menu.
-        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
+//        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
 
         $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
         $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
 
         $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
         $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
+
         $o.= html_writer::start_tag('div', array('class' => 'content'));
 
+        // Show the section title for all but for section-0 only if it has a custom name
+        $show_section_title = ($section->section !== 0 || $section->name != '');
+
         // When not on a section page, we display the section titles except the general section if null
-        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
+//        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
 
         // When on a section page, we only display the general section title, if title is not the default one
         $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
 
-        $classes = ' accesshide';
-        if ($hasnamenotsecpg || $hasnamesecpg) {
-            $classes = '';
-        }
+//        $classes = ' accesshide';
+//        $classes = '';
+//        if ($hasnamenotsecpg || $hasnamesecpg) {
+//            $classes = '';
+//        }
         $sectionname = html_writer::tag('span', $this->section_title($section, $course));
-        if($toggle_seq[$section->section] === '0') {
+        if(isset($toggle_seq[$section->section]) && $toggle_seq[$section->section] === '0') {
             $toggler = '<b class="toggler toggler_open" style="cursor: pointer; display: none;">v</b><b class="toggler toggler_closed" style="cursor: pointer;">></b> ';
+            $divA = array('class' => 'toggle_area hidden', 'style' => 'display: none;');
         } else {
             $toggler = '<b class="toggler toggler_open" style="cursor: pointer;">v</b><b class="toggler toggler_closed" style="cursor: pointer; display: none;">></b> ';
+            $divA = array('class' => 'toggle_area');
         }
-        $o .= $this->output->heading($toggler.$sectionname, 3, 'sectionname' . $classes);
+        if($show_section_title) {
+            $o .= $this->output->heading($toggler.$sectionname, 3, 'sectionname');
+        }
         $o .= $this->section_availability($section);
-
-        if($toggle_seq[$section->section] === '0') {
+        $o .= html_writer::start_tag('div', $divA);
+        $o .= html_writer::start_tag('div', array('class' => 'summary'));
+/*
+        if(isset($toggle_seq[$section->section]) && $toggle_seq[$section->section] === '0') {
             $o .= html_writer::start_tag('div', array('class' => 'summary hidden', 'style' => 'display: none;'));
         } else {
             $o .= html_writer::start_tag('div', array('class' => 'summary'));
         }
+*/
         if ($section->uservisible || $section->visible) {
             // Show summary if section is available or has availability restriction information.
             // Do not show summary if section is hidden but we still display it because of course setting
@@ -484,17 +513,21 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
 //        return '';
         $o = '';
         if($format_options['section0_ontop']) {
-            $section0 = $sections[0];
+            $thissection = $sections[0];
             $o .= html_writer::start_tag('div', array('id' => 'ontop_area', 'class' => 'section0_ontop'));
             $o .= html_writer::start_tag('ul', array('id' => 'ontop_area', 'class' => 'topics'));
 
+            $o .= $this->render_section($course, $thissection);
+/*
             // 0-section is displayed a little different then the others
-            if ($section0->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
-                $o .= $this->section0_ontop_header($section0, $course, false, 0);
-                $o .= $this->courserenderer->course_section_cm_list($course, $section0, 0);
+            if ($thissection->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
+//                $o .= $this->section0_ontop_header($section0, $course, false, 0);
+                $o .= $this->section_header($thissection, $course, false, 0);
+                $o .= $this->courserenderer->course_section_cm_list($course, $thissection, 0);
                 $o .= $this->courserenderer->course_section_add_cm_control($course, 0, 0);
                 $o .= $this->section_footer();
             }
+*/
         } else {
             $o .= html_writer::start_tag('div', array('id' => 'ontop_area'));
             $o .= html_writer::start_tag('ul', array('id' => 'ontop_area', 'class' => 'topics'));
@@ -562,13 +595,16 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
                     $o .= html_writer::end_tag('div');
                     continue;
                 }
+                $o .= $this->render_section($course, $thissection);
                 // 0-section is displayed a little different then the others
+/*
                 if ($thissection->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
                     $o .= $this->section_header($thissection, $course, false, 0);
                     $o .= $this->courserenderer->course_section_cm_list($course, $thissection, 0);
                     $o .= $this->courserenderer->course_section_add_cm_control($course, 0, 0);
                     $o .= $this->section_footer();
                 }
+*/
                 $o .= html_writer::end_tag('div');
                 continue;
             }
@@ -586,6 +622,8 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
                 continue;
             }
 
+            $o .= $this->render_section($course, $thissection);
+            /*
             if (!$PAGE->user_is_editing() && $course->coursedisplay == COURSE_DISPLAY_MULTIPAGE) {
                 // Display section summary only.
                 $o .= $this->section_summary($thissection, $course, null);
@@ -597,6 +635,24 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
                 }
                 $o .= $this->section_footer();
             }
+            */
+        }
+        return $o;
+    }
+
+    public function render_section($course, $section) {
+        global $PAGE;
+        $o = '';
+        if (!$PAGE->user_is_editing() && $course->coursedisplay == COURSE_DISPLAY_MULTIPAGE) {
+            // Display section summary only.
+            $o .= $this->section_summary($section, $course, null);
+        } else {
+            $o .= $this->section_header($section, $course, false, 0);
+            if ($section->uservisible) {
+                $o .= $this->courserenderer->course_section_cm_list($course, $section, 0);
+                $o .= $this->courserenderer->course_section_add_cm_control($course, $section->section, 0);
+            }
+            $o .= $this->section_footer();
         }
         return $o;
     }
@@ -761,22 +817,13 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         }
     }
 
-    /**
-     * Generate html for a section summary text
-     *
-     * @param stdClass $section The course_section entry from DB
-     * @return string HTML to output.
-     */
-    protected function format_summary_text($section) {
+    protected function section_footer() {
+        $o = html_writer::end_tag('div');
+        $o = html_writer::end_tag('div');
+        $o.= html_writer::end_tag('li');
 
-        $context = context_course::instance($section->course);
-        $summarytext = file_rewrite_pluginfile_urls($section->summary, 'pluginfile.php',
-            $context->id, 'course', 'section', $section->id);
-
-        $options = new stdClass();
-        $options->noclean = true;
-        $options->overflowdiv = true;
-        return format_text($summarytext, $section->summaryformat, $options);
+        return $o;
     }
+
 }
 
