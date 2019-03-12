@@ -506,7 +506,7 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
     }
 
     // Render the sections of a course
-    public function render_sections($course, $sections, $format_options, $modinfo, $numsections){
+    public function render_sections1($course, $sections, $format_options, $modinfo, $numsections){
         global $PAGE;
 
         $o = '';
@@ -520,6 +520,56 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
                     $o .= $this->courserenderer->course_section_add_cm_control($course, 0, 0);
                     $o .= $this->section_footer();
                 }
+                continue;
+            }
+            if ($section > $numsections) {
+                // activities inside this section are 'orphaned', this section will be printed as 'stealth' below
+                continue;
+            }
+            // Show the section if the user is permitted to access it, OR if it's not available
+            // but there is some available info text which explains the reason & should display,
+            // OR it is hidden but the course has a setting to display hidden sections as unavilable.
+            $showsection = $thissection->uservisible ||
+                ($thissection->visible && !$thissection->available && !empty($thissection->availableinfo)) ||
+                (!$thissection->visible && !$course->hiddensections);
+            if (!$showsection) {
+                continue;
+            }
+
+            if (!$PAGE->user_is_editing() && $course->coursedisplay == COURSE_DISPLAY_MULTIPAGE) {
+                // Display section summary only.
+                $o .= $this->section_summary($thissection, $course, null);
+            } else {
+                $o .= $this->section_header($thissection, $course, false, 0);
+                if ($thissection->uservisible) {
+                    $o .= $this->courserenderer->course_section_cm_list($course, $thissection, 0);
+                    $o .= $this->courserenderer->course_section_add_cm_control($course, $section, 0);
+                }
+                $o .= $this->section_footer();
+            }
+        }
+        return $o;
+    }
+    public function render_sections($course, $sections, $format_options, $modinfo, $numsections){
+        global $PAGE;
+
+        $o = '';
+
+        foreach ($sections as $section => $thissection) {
+            if ($section == 0) {
+                $o .= html_writer::start_tag('div', array('id' => 'inline_area'));
+                if($format_options['section0_ontop']){ // section-0 is already shown on top
+                    $o .= html_writer::end_tag('div');
+                    continue;
+                }
+                // 0-section is displayed a little different then the others
+                if ($thissection->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
+                    $o .= $this->section_header($thissection, $course, false, 0);
+                    $o .= $this->courserenderer->course_section_cm_list($course, $thissection, 0);
+                    $o .= $this->courserenderer->course_section_add_cm_control($course, 0, 0);
+                    $o .= $this->section_footer();
+                }
+                $o .= html_writer::end_tag('div');
                 continue;
             }
             if ($section > $numsections) {
