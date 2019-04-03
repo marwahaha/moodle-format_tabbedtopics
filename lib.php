@@ -57,12 +57,14 @@ class format_tabbedtopics extends format_topics {
                     'default' => $courseconfig->coursedisplay,
                     'type' => PARAM_INT,
                 ),
+                'toggle' => array(
+                    'default' => false,
+                    'type' => PARAM_BOOL,
+                ),
                 'section0_ontop' => array(
                     'default' => false,
                     'type' => PARAM_BOOL,
-                    'label' => '',
                 ),
-
                 'single_section_tabs' => array(
                     'default' => get_config('format_tabbedtopics', 'defaultsectionnameastabname'),
                     'type' => PARAM_BOOL
@@ -111,6 +113,12 @@ class format_tabbedtopics extends format_topics {
                     ),
                     'help' => 'coursedisplay',
                     'help_component' => 'moodle',
+                ),
+                'toggle' => array(
+                    'label' => get_string('toggle_label', 'format_tabbedtopics'),
+                    'element_type' => 'advcheckbox',
+                    'help' => 'toggle',
+                    'help_component' => 'format_tabbedtopics',
                 ),
                 'section0_ontop' => array(
                     'label' => get_string('section0_label', 'format_tabbedtopics'),
