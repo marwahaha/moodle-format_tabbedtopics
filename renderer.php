@@ -223,22 +223,22 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         }
 
         if ($tab->id == 'tab0') {
-            $o .= '<span 
-                data-toggle="tab" id="'.$tab->id.'" 
-                sections="'.$tab->sections.'" 
-                section_nums="'.$tab->section_nums.'" 
-                class="tablink nav-link " 
-                tab_title="'.$tab->title.'", 
+            $o .= '<span
+                data-toggle="tab" id="'.$tab->id.'"
+                sections="'.$tab->sections.'"
+                section_nums="'.$tab->section_nums.'"
+                class="tablink nav-link "
+                tab_title="'.$tab->title.'",
                 generic_title = "'.$tab->generic_title.'"
                 >';
         } else {
-            $o .= '<span 
-                data-toggle="tab" id="'.$tab->id.'" 
-                sections="'.$tab->sections.'" 
-                section_nums="'.$tab->section_nums.'" 
-                class="tablink topictab nav-link " 
-                tab_title="'.$tab->title.'" 
-                generic_title = "'.$tab->generic_title.'" 
+            $o .= '<span
+                data-toggle="tab" id="'.$tab->id.'"
+                sections="'.$tab->sections.'"
+                section_nums="'.$tab->section_nums.'"
+                class="tablink topictab nav-link "
+                tab_title="'.$tab->title.'"
+                generic_title = "'.$tab->generic_title.'"
                 style="'.($PAGE->user_is_editing() ? 'cursor: move;' : '').'">';
         }
         // render the tab name as inplace_editable
@@ -360,17 +360,23 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
 //        if ($hasnamenotsecpg || $hasnamesecpg) {
 //            $classes = '';
 //        }
+
         $sectionname = html_writer::tag('span', $this->section_title($section, $course));
         if(isset($toggle_seq[$section->section]) && $toggle_seq[$section->section] === '0') {
             $toggler = '<b class="toggler toggler_open" style="cursor: pointer; display: none;">v</b><b class="toggler toggler_closed" style="cursor: pointer;">></b> ';
+            $section->toggle_open = false;
             $divA = array('class' => 'toggle_area hidden', 'style' => 'display: none;');
         } else {
             $toggler = '<b class="toggler toggler_open" style="cursor: pointer;">v</b><b class="toggler toggler_closed" style="cursor: pointer; display: none;">></b> ';
+            $section->toggle_open = true;
             $divA = array('class' => 'toggle_area');
         }
+
         if($show_section_title) {
 //            $o .= $this->output->heading($toggler.$sectionname, 3, 'sectionname');
-            $o .= $this->toggle_heading($toggler.$sectionname, 3, 'sectionname');
+//            $o .= $this->toggle_heading($course, $section, 3, $toggle_seq);
+//            $o .= $this->toggle_heading0($toggler.$sectionname, 3, 'sectionname');
+            $o .= $this->toggle_heading($course,$section, $toggle_seq);
         }
         $o .= $this->section_availability($section);
         $o .= html_writer::start_tag('div', $divA);
@@ -667,7 +673,40 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         return $o;
     }
 
-    public function toggle_heading($text, $level = 2, $classes = null, $id = null) {
+    public function toggle_heading1($course, $section, $level = 2, $toggle_seq) {
+      $sectionname = html_writer::tag('span', $this->section_title($section, $course));
+      if(isset($toggle_seq[$section->section]) && $toggle_seq[$section->section] === '0') {
+          $toggler = '<b class="toggler toggler_open" style="cursor: pointer; display: none;">v</b><b class="toggler toggler_closed" style="cursor: pointer;">></b> ';
+          $divA = array('class' => 'toggle_area hidden', 'style' => 'display: none;');
+      } else {
+          $toggler = '<b class="toggler toggler_open" style="cursor: pointer;">v</b><b class="toggler toggler_closed" style="cursor: pointer; display: none;">></b> ';
+          $divA = array('class' => 'toggle_area');
+      }
+      $o = '';
+        $level = (integer) $level;
+        if ($level < 1 or $level > 6) {
+            throw new coding_exception('Heading level must be an integer between 1 and 6.');
+        }
+
+        $text = $toggler.$sectionname;
+        $classes = 'sectionhead';
+        return html_writer::tag('h' . $level, $text, array('id' => $id, 'class' => renderer_base::prepare_classes($classes)));
+        return $o;
+    }
+    public function toggle_heading($course, $section, $toggle_seq) {
+      $o = '';
+      if(isset($toggle_seq[$section->section]) && $toggle_seq[$section->section] === '0') {
+//      if($section->toggle_open === true) {
+        $toggler = '<b class="toggler toggler_open" style="cursor: pointer; display: none;">v</b><b class="toggler toggler_closed" style="cursor: pointer;">></b> ';
+      } else {
+        $toggler = '<b class="toggler toggler_open" style="cursor: pointer;">v</b><b class="toggler toggler_closed" style="cursor: pointer; display: none;">></b> ';
+      }
+      $sectionname = html_writer::tag('span', $this->section_title($section, $course));
+//      $sectionname = html_writer::tag('span', $this->section_title($section, $course));
+      $text = $toggler.$section->name;
+      return html_writer::tag('h' . 3, $text, array('class' => renderer_base::prepare_classes('sectionhead')));
+    }
+    public function toggle_heading0($text, $level = 2, $classes = null, $id = null) {
         $level = (integer) $level;
         if ($level < 1 or $level > 6) {
             throw new coding_exception('Heading level must be an integer between 1 and 6.');
@@ -676,4 +715,3 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
     }
 
 }
-
