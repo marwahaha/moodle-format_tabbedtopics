@@ -33,6 +33,25 @@ define(['jquery', 'jqueryui'], function($) {
 // ---------------------------------------------------------------------------------------------------------------------
             // rumdidumdidum
             var toggleSection = function() { $(".toggler").on('click', function() {
+//                alert('toggler!');
+                if ($(this).hasClass('toggler_closed')) {
+//                    alert('now opening section');
+                    $(this).parent().find('.toggler_open').show();
+                    $(this).hide();
+                    $(this).parent().parent().parent().find('.toggle_area').removeClass('hidden').show();
+                } else {
+//                    alert('now closing section');
+                    $(this).parent().find('.toggler_closed').show();
+                    $(this).hide();
+                    $(this).parent().parent().parent().find('.toggle_area').addClass('hidden').hide();
+                }
+
+                // Now get the toggler status of each section
+                updateToggleSeq();
+            });};
+
+            var toggleSection0 = function() { $(".toggler").on('click', function() {
+                alert('toggler!');
                 if ($(this).parent().parent().find('.toggle_area').hasClass('hidden')) {
                     $(this).parent().parent().find('.toggle_area').removeClass('hidden').show();
                     $(this).parent().parent().find('.toggler_closed').hide();

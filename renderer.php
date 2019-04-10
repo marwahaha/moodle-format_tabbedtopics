@@ -306,20 +306,20 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
      * @return string HTML to output.
      */
     protected function section_header($section, $course, $onsectionpage, $sectionreturn=null) {
-         global $PAGE;
+        global $PAGE;
 
-         $o = '';
-         $sectionstyle = '';
+        $o = '';
+        $sectionstyle = '';
 
-         if ($section->section != 0) {
-             // Only in the non-general sections.
-             if (!$section->visible) {
-                 $sectionstyle = ' hidden';
-             }
-             if (course_get_format($course)->is_section_current($section)) {
-                 $sectionstyle = ' current';
-             }
-         }
+        if ($section->section != 0) {
+            // Only in the non-general sections.
+            if (!$section->visible) {
+                $sectionstyle = ' hidden';
+            }
+            if (course_get_format($course)->is_section_current($section)) {
+                $sectionstyle = ' current';
+            }
+        }
 
         // When rendering section-0 check if it is on top and adjust classes
         if($section->section === 0 && $course->section0_ontop === 1) {
@@ -333,41 +333,105 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
             'aria-label'=> get_section_name($course, $section)));
 
         // Create a span that contains the section title to be used to create the keyboard section move menu.
-         $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
+        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
 
-         $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
-         $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
+        $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
 
-         $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
-         $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
-         $o.= html_writer::start_tag('div', array('class' => 'content'));
+        $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
+        $o.= html_writer::start_tag('div', array('class' => 'content'));
 
-         // When not on a section page, we display the section titles except the general section if null
-         $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
+        // When not on a section page, we display the section titles except the general section if null
+        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
 
-         // When on a section page, we only display the general section title, if title is not the default one
-         $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
+        // When on a section page, we only display the general section title, if title is not the default one
+        $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
 
-         $classes = ' accesshide';
-         if ($hasnamenotsecpg || $hasnamesecpg) {
-             $classes = '';
-         }
-         $sectionname = html_writer::tag('span', $this->section_title($section, $course));
-         $o.= $this->output->heading($sectionname, 3, 'sectionname' . $classes);
+        $classes = ' accesshide';
+        if ($hasnamenotsecpg || $hasnamesecpg) {
+            $classes = '';
+        }
+        $sectionname = html_writer::tag('span', $this->section_title($section, $course));
+        $o.= $this->output->heading($sectionname, 3, 'sectionname' . $classes);
 
-         $o .= $this->section_availability($section);
+        $o .= $this->section_availability($section);
 
-         $o .= html_writer::start_tag('div', array('class' => 'summary'));
-         if ($section->uservisible || $section->visible) {
-             // Show summary if section is available or has availability restriction information.
-             // Do not show summary if section is hidden but we still display it because of course setting
-             // "Hidden sections are shown in collapsed form".
-             $o .= $this->format_summary_text($section);
-         }
-         $o .= html_writer::end_tag('div');
+        $o .= html_writer::start_tag('div', array('class' => 'summary'));
+        if ($section->uservisible || $section->visible) {
+            // Show summary if section is available or has availability restriction information.
+            // Do not show summary if section is hidden but we still display it because of course setting
+            // "Hidden sections are shown in collapsed form".
+            $o .= $this->format_summary_text($section);
+        }
+//        $o .= html_writer::end_tag('div');
 
-         return $o;
-     }
+        return $o;
+    }
+    protected function section_toggle_headerXXX($section, $course, $onsectionpage, $sectionreturn=null) {
+        global $PAGE;
+
+        $o = '';
+        $sectionstyle = '';
+
+        if ($section->section != 0) {
+            // Only in the non-general sections.
+            if (!$section->visible) {
+                $sectionstyle = ' hidden';
+            }
+            if (course_get_format($course)->is_section_current($section)) {
+                $sectionstyle = ' current';
+            }
+        }
+
+        // When rendering section-0 check if it is on top and adjust classes
+        if($section->section === 0 && $course->section0_ontop === 1) {
+            $classes = 'section clearfix'; // On top is not main
+        } else {
+            $classes = 'section main clearfix';
+        }
+
+        $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section, 'section-id' => $section->id,
+            'class' => $classes.$sectionstyle, 'role'=>'region',
+            'aria-label'=> get_section_name($course, $section)));
+
+        // Create a span that contains the section title to be used to create the keyboard section move menu.
+        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
+
+        $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
+
+        $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
+        $o.= html_writer::start_tag('div', array('class' => 'content'));
+
+        // When not on a section page, we display the section titles except the general section if null
+        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
+
+        // When on a section page, we only display the general section title, if title is not the default one
+        $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
+
+        $classes = ' accesshide';
+        if ($hasnamenotsecpg || $hasnamesecpg) {
+            $classes = '';
+        }
+        $sectionname = html_writer::tag('span', $this->section_title($section, $course));
+        $o.= $this->output->heading($sectionname, 3, 'sectionname' . $classes);
+
+        $o .= $this->section_availability($section);
+
+        $o .= html_writer::start_tag('div', array('class' => 'summary'));
+        if ($section->uservisible || $section->visible) {
+            // Show summary if section is available or has availability restriction information.
+            // Do not show summary if section is hidden but we still display it because of course setting
+            // "Hidden sections are shown in collapsed form".
+            $o .= $this->format_summary_text($section);
+        }
+
+        $o .= html_writer::end_tag('div');
+
+        return $o;
+    }
     protected function section_toggle_header($section, $course, $onsectionpage, $sectionreturn=null) {
         global $PAGE;
 
@@ -393,6 +457,7 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
             $classes = 'section main clearfix';
         }
 
+        // section start
         $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section, 'section-id' => $section->id,
 //            'class' => 'section main clearfix'.$sectionstyle, 'role'=>'region',
             'class' => $classes.$sectionstyle, 'role'=>'region',
@@ -401,49 +466,66 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         // Create a span that contains the section title to be used to create the keyboard section move menu.
 //        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
 
+        // the left and right elements
         $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
         $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
 
         $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
         $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
 
+        // the content
         $o.= html_writer::start_tag('div', array('class' => 'content'));
 
-        // Show the section title for all but for section-0 only if it has a custom name
-        $show_section_title = ($section->section !== 0 || $section->name != '');
+        // the sectionhead
+        $o.= html_writer::start_tag('div', array('class' => 'sectionhead'));
 
+        // prepare the toggle
+//        $o.= html_writer::start_tag('div', array('class' => 'the_toggle '));
         if(isset($toggle_seq[$section->section]) && $toggle_seq[$section->section] === '0') {
-            $toggler = '<b class="toggler toggler_open" style="cursor: pointer; display: none;"><i class="fas fa-chevron-down"></i></b><b class="toggler toggler_closed" style="cursor: pointer;"><i class="fas fa-chevron-right"></i></b> ';
-            $section->toggle_open = false;
-            $divA = array('class' => 'toggle_area hidden', 'style' => 'display: none;');
+//            $o .= '<span class="toggler toggler_open" style="cursor: pointer; display: none;"><i class="fas fa-chevron-down"></i></span>';
+//            $o .= '<span class="toggler toggler_closed" style="cursor: pointer;"><i class="fas fa-chevron-right"></i></span>';
+            $toggler = '<i class="toggler toggler_open fas fa-chevron-down" style="cursor: pointer; display: none;"></i>';
+            $toggler .= '<i class="toggler toggler_closed fas fa-chevron-right" style="cursor: pointer;"></i>';
+
+//            $section->toggle_open = false;
+//            $divA = array('class' => 'toggle_area hidden', 'style' => 'display: none;');
         } else {
-            $toggler = '<b class="toggler toggler_open" style="cursor: pointer;"><i class="fas fa-chevron-down"></i></b><b class="toggler toggler_closed" style="cursor: pointer; display: none;"><i class="fas fa-chevron-right"></i></b> ';
-            $section->toggle_open = true;
-            $divA = array('class' => 'toggle_area');
+//            $o .= '<span class="toggler toggler_open" style="cursor: pointer;"><i class="fas fa-chevron-down"></i></span>';
+//            $o .= '<span class="toggler toggler_closed" style="cursor: pointer; display: none;"><i class="fas fa-chevron-right"></i></span>';
+            $toggler = '<i class="toggler toggler_open fas fa-chevron-down" style="cursor: pointer;"></i>';
+            $toggler .= '<i class="toggler toggler_closed fas fa-chevron-right" style="cursor: pointer; display: none;"></i>';
+
+//            $toggler = '<b class="toggler toggler_open" style="cursor: pointer;"><i class="fas fa-chevron-down"></i></b><b class="toggler toggler_closed" style="cursor: pointer; display: none;"><i class="fas fa-chevron-right"></i></b> ';
+//            $section->toggle_open = true;
+//            $divA = array('class' => 'toggle_area');
+        }
+        $toggler .= ' ';
+
+//        $o .= html_writer::end_tag('div'); //ending the toggle
+
+        // the sectionname
+        if(($section->section !== 0 || $section->name != '')) {
+            $sectionname = html_writer::tag('span', $this->section_title($section, $course));
+            $o .= html_writer::tag('h' . 3, $toggler.$this->section_title($section, $course), array('class' => renderer_base::prepare_classes('sectionname')));
         }
 
-        if($show_section_title) {
-            $sectionname = html_writer::tag('span', $this->section_title($section, $course));
-            $text = $toggler.$sectionname;
-            $o .= html_writer::tag('h' . 3, $text, array('class' => renderer_base::prepare_classes('sectionhead')));
+        $o .= html_writer::end_tag('div'); // ending the sectionhead
+
+        // the sectionbody
+        if(isset($toggle_seq[$section->section]) && $toggle_seq[$section->section] === '0') {
+            $o.= html_writer::start_tag('div', array('class' => 'sectionbody summary toggle_area hidden', 'style' => 'display: none;'));
+        } else {
+            $o.= html_writer::start_tag('div', array('class' => 'sectionbody summary toggle_area'));
         }
-        $o .= $this->section_availability($section);
-        $o .= html_writer::start_tag('div', $divA);
-        $o .= html_writer::start_tag('div', array('class' => 'summary'));
-        /*
-                if(isset($toggle_seq[$section->section]) && $toggle_seq[$section->section] === '0') {
-                    $o .= html_writer::start_tag('div', array('class' => 'summary hidden', 'style' => 'display: none;'));
-                } else {
-                    $o .= html_writer::start_tag('div', array('class' => 'summary'));
-                }
-        */
         if ($section->uservisible || $section->visible) {
             // Show summary if section is available or has availability restriction information.
             // Do not show summary if section is hidden but we still display it because of course setting
-            // "Hidden sections are shown in collapsed form".
             $o .= $this->format_summary_text($section);
         }
-        $o .= html_writer::end_tag('div');
+
+//        $o .= html_writer::end_tag('div'); // ending the sectionbody
+//        $o .= html_writer::end_tag('div'); //ending the content - already done in section_footer()
+//        $o .= html_writer::end_tag('li'); // ending the section - already done in section_footer()
 
         return $o;
     }
@@ -720,6 +802,8 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
             } else {
                 $o .= $this->section_header($section, $course, false, 0);
             }
+
+            // now the course modules for this section
             if ($section->uservisible) {
                 $o .= $this->courserenderer->course_section_cm_list($course, $section, 0);
                 $o .= $this->courserenderer->course_section_add_cm_control($course, $section->section, 0);
@@ -729,10 +813,18 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         return $o;
     }
 
-    // Render hidden sections for course editors only
+    protected function section_footer() {
+        $o = html_writer::end_tag('div'); // ending the sectionbody
+        $o .= html_writer::end_tag('div'); //ending the content
+        $o .= html_writer::end_tag('li'); // ending the section
+
+        return $o;
+    }
+
+// Render hidden sections for course editors only
     public function render_hidden_sections($course, $sections, $context, $modinfo, $numsections) {
         global $PAGE;
-        $o ='';
+        $o ='<div class="testing"></div>';
         if ($PAGE->user_is_editing() and has_capability('moodle/course:update', $context)) {
             // Print stealth sections if present.
             foreach ($sections as $section => $thissection) {
@@ -889,7 +981,7 @@ class format_tabbedtopics_renderer extends format_topics_renderer {
         }
     }
 
-    protected function section_footer() {
+    protected function section_footerx() {
         $o = html_writer::end_tag('div');
         $o = html_writer::end_tag('div');
         $o.= html_writer::end_tag('li');

@@ -51,19 +51,15 @@ $string['addsections'] = 'Add Topics';
 $string['modulecontent'] = 'Module Content';
 $string['tab0_generic_name'] = 'Module Content';
 
-$string['toggle'] = 'Allow collapsing sections';
-$string['toggle_label'] = 'Allow collapsing sections';
-$string['toggle_help'] = 'When checked sections are collapsable by clicking the toggle icon in front of the title';
+$string['toggle'] = 'Enable collapsing sections';
+$string['toggle_label'] = 'Enable collapsing sections';
+$string['toggle_help'] = 'When checked sections may be collapsed/expanded by clicking the toggle icon in front of the title';
 
 $string['section0_label'] = 'Show Topic 0 above all tabs';
 $string['section0_help'] = 'When checked topic 0 is always shown above the tabs.';
 
 $string['single_section_tabs_label'] = 'Use topic name as tab name for single topics';
 $string['single_section_tabs_help'] = 'When checked tabs with a single topic will use the topic name as tab name.';
-
-$string['toggle_sections'] = 'Enable collapsing sections';
-$string['toggle_sections_label'] = 'Enable collapsing sections';
-$string['toggle_sections_help'] = 'When checked sections may be collapsed/expanded by clicking the section title.';
 
 $string['tabname'] = 'Tab';
 $string['tabzero_title'] = 'Module Content';

@@ -69,3 +69,7 @@ li.section.ontop {
 .tabs {
     padding-left: 30px;
 }
+
+.toggler {
+    color: grey;
+}
